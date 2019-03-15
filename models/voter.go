@@ -10,4 +10,10 @@ type (
         BallotID    string  `json:"ballotid"`
         Voted       bool    `json:"voted"`
     }
+
+    MailRecipient struct {
+        Name        string
+        EmailID     string
+        AuthCode    string
+    }
 ) 
