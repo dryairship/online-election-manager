@@ -16,4 +16,13 @@ type (
         EmailID     string
         AuthCode    string
     }
-) 
+)
+
+func (voter Voter) GetMailRecipient() MailRecipient {
+    return MailRecipient{
+        Name:       voter.Name,
+        EmailID:    voter.Email,
+        AuthCode:   voter.AuthCode,
+    }
+}
+
