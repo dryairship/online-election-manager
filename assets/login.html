@@ -1,0 +1,101 @@
+<div id="loginContainer" class="container h-100" style="display:block">
+    <div class="d-flex justify-content-center h-100">
+        <div class="user_card">
+            <div class="d-flex justify-content-center">
+                <div class="iitk_logo_container">
+                    <img src="logo.jpg" class="iitk_logo" alt="Logo">
+                </div>
+            </div>
+            <div class="d-flex justify-content-center form_container">
+                <form id="loginform" action="#" onsubmit="attemptLogin()">
+                <div class="alert alert-danger" role="alert" id="loginError" style="display:none">
+                        Invalid roll number or password!
+                </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input type="text" name="roll" class="form-control input_user" value="" placeholder="Roll Number">
+                    </div>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        </div>
+                        <input type="password" name="password" class="form-control input_pass" value="" placeholder="Password">
+                    </div>
+                    <div class="d-flex justify-content-center mt-3 login_container">
+                        <button type="submit" name="button" class="btn login_btn">Login</button>
+                    </div>
+                </form>
+            </div>
+                    <div class="d-flex justify-content-center mt-3 mb-3 login_container">
+                        <button type="button" name="button" class="btn login_btn" onclick="showRegistrationForm()">Register for an account</button>
+                    </div>
+        </div>
+    </div>
+</div>
+<div id="registrationContainer" class="container h-100" style="display:none">
+    <div class="d-flex justify-content-center h-100">
+        <div class="user_card">
+            <div class="d-flex justify-content-center">
+                <div class="iitk_logo_container">
+                    <img src="logo.jpg" class="iitk_logo" alt="Logo">
+                </div>
+            </div>
+            <div class="d-flex justify-content-center form_container mb-0">
+                <form id="mailform" action="#" onsubmit="sendMail()">
+                    <h5>Send Verification Mail</h5>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input type="text" name="roll" class="form-control input_user" value="" placeholder="Roll Number">
+                    </div>
+                    <div class="d-flex justify-content-center mt-3 login_container">
+                        <button type="submit" name="button" class="btn login_btn">Send Authentication Code</button>
+                    </div>
+                </form>
+            </div>
+            <div class="d-flex justify-content-center form_container mt-3">
+                <form id="registrationform" action="#" onsubmit="register()">
+                    <h5>Enter Details To Register</h5>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input type="text" name="roll" class="form-control input_user" value="" placeholder="Roll Number">
+                    </div>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        </div>
+                        <input type="password" name="password" class="form-control input_pass" value="" placeholder="Password">
+                    </div>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        </div>
+                        <input type="password" name="password2" class="form-control input_pass" value="" placeholder="Re-enter Password">
+                    </div>
+                    <div class="input-group mb-2">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-user-secret"></i></span>
+                        </div>
+                        <input type="text" name="authcode" class="form-control input_user" value="" placeholder="Authentication Code">
+                    </div>
+                    <div class="d-flex justify-content-center mt-3 login_container">
+                        <button type="submit" name="button" class="btn login_btn">Register</button>
+                    </div>
+                </form>
+            </div>
+                    <div class="d-flex justify-content-center mt-3 mb-3 login_container">
+                        <button type="button" name="button" class="btn login_btn" onclick="showLoginForm()">I already have an account</button>
+                    </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("form").submit(function(e){
+        return false;
+    });
+</script>
