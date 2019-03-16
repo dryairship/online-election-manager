@@ -1,5 +1,9 @@
 package models
 
+import (
+    "github.com/dryairship/online-election-manager/config"
+)
+
 type (
     Voter struct {
         Roll        string  `json:"roll"`
@@ -32,3 +36,14 @@ func (voter Voter) GetMailRecipient() MailRecipient {
     }
 }
 
+func (skeleton StudentSkeleton) CreateVoter(authcode string) Voter {
+    return Voter{
+        Roll:       skeleton.Roll,
+        Name:       skeleton.Name,
+        Email:      skeleton.Email+config.MailSuffix,
+        Password:   "",
+        AuthCode:   authcode,
+        BallotID:   "",
+        Voted:      false,
+    }
+}
