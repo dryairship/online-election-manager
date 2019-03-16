@@ -1,7 +1,7 @@
 package controllers
 
 import (
-    "github.com/dryairship/oem/db"
+    "github.com/dryairship/online-election-manager/db"
 )
 
 var ElectionDb db.ElectionDatabase
