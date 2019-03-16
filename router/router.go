@@ -20,5 +20,5 @@ func SetUpRoutes(r *gin.Engine) {
         users.POST("/register", controllers.RegisterNewVoter)
     }
     
-    r.Use(static.Serve("/",static.LocalFile(config.AssetsPath,false)))
+    r.Use(static.Serve("/",static.LocalFile(config.AssetsPath,true)))
 }
