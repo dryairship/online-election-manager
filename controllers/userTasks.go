@@ -59,3 +59,17 @@ func SendMailToStudent(c *gin.Context) {
     }
     c.String(http.StatusAccepted, "Verification Mail successfully sent to "+voter.Email)
 }
+
+func SessionLogin(c *gin.Context){
+    if c.PostForm("roll") == "180561" {
+        c.JSON(200, gin.H{
+            "success": 1,
+            "roll": c.PostForm("roll"),
+            "pass": c.PostForm("password"),
+        })
+    } else {
+        c.JSON(200, gin.H{
+            "success": 0,
+        })
+    }
+}
