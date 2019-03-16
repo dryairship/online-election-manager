@@ -25,7 +25,7 @@ func CanMailBeSentToStudent(roll string) (bool, error) {
         if voter.AuthCode == "" {
             return false, &UserError{"Student has already registered."}
         } else {
-            return false, &UserError{"Verification mail has already been sent to this student."}
+            return false, &UserError{"Verification mail has already<br>been sent to this student."}
         }
     }
 }
@@ -77,7 +77,7 @@ func SendMailToStudent(c *gin.Context) {
     
     skeleton, err := ElectionDb.FindStudentSkeleton(roll)
     if err != nil {
-        c.String(http.StatusNotFound, "Invalid Roll Number. Student does not exist.")
+        c.String(http.StatusNotFound, "Invalid Roll Number.<br>Student does not exist.")
         return
     }
     
@@ -94,7 +94,7 @@ func SendMailToStudent(c *gin.Context) {
             return
         }
     }
-    c.String(http.StatusAccepted, "Verification Mail successfully sent to "+voter.Email)
+    c.String(http.StatusAccepted, "Verification Mail successfully sent<br>to "+voter.Email)
 }
 
 func SessionLogin(c *gin.Context){
