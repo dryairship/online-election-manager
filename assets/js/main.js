@@ -1,3 +1,5 @@
+var userPassword;
+
 function attemptLogin(){
     console.log("Called");
     var data = $('#loginform').serialize();
@@ -17,7 +19,6 @@ function attemptLogin(){
             }
         }
     });
-    return false;
 }
 
 function sendMail(){
@@ -44,6 +45,58 @@ function sendMail(){
             notif.addClass("alert-danger");
         }
     });
+}
+
+function register(){
+    console.log("reg Called");
+    var notif = $('#regNotification');
+    var data = $('#registrationform').serializeArray();
+    var roll = data[0].value;
+    var pass = data[1].value;
+    var pass2 = data[2].value;
+    var auth = data[3].value;
+    var passHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(pass));
+    
+    if(pass!=pass2){
+        notif.html("The passwords do not match.");
+        notif.css("display","block");
+        notif.removeClass("alert-info");
+        notif.removeClass("alert-success");
+        notif.addClass("alert-danger");
+    }else{
+        notif.html("Registering voter...")
+        notif.css("display","block");
+        notif.removeClass("alert-danger");
+        notif.removeClass("alert-success");
+        notif.addClass("alert-info");
+        userPassword = pass;
+        $.ajax({
+            type: "POST",
+            url:  "/users/register",
+            data: $.param({
+                'roll':roll,
+                'pass':passHash,
+                'auth':auth
+            }),
+            cache: false,
+            success: function(response){
+                console.log(response);
+                notif.html(response);
+                notif.css("display","block");
+                notif.removeClass("alert-info");
+                notif.removeClass("alert-danger");
+                notif.addClass("alert-success");
+            },
+            error: function(response){
+                console.log(response);
+                notif.html(response.responseText);
+                notif.css("display","block");
+                notif.removeClass("alert-info");
+                notif.removeClass("alert-success");
+                notif.addClass("alert-danger");
+            }
+        });
+    }
 }
 
 function init(){
