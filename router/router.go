@@ -17,6 +17,7 @@ func SetUpRoutes(r *gin.Engine) {
     users := r.Group("/users")
     {
         users.GET("/mail/:roll", controllers.SendMailToStudent)
+        users.POST("/register", controllers.RegisterNewVoter)
     }
     
     r.Use(static.Serve("/",static.LocalFile(config.AssetsPath,false)))
