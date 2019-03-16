@@ -27,3 +27,9 @@ func (db ElectionDatabase) FindStudentSkeleton(roll string) (models.StudentSkele
     return skeleton, err
 }
 
+func (db ElectionDatabase) FindVoter(roll string) (models.Voter, error) {
+    votersCollection := db.Session.DB(config.MongoDbName).C("voters")
+    voter := models.Voter{}
+    err := votersCollection.Find(bson.M{"roll":roll}).One(&voter)
+    return voter, err
+}
