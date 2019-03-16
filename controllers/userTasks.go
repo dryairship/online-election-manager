@@ -1,7 +1,10 @@
 package controllers
 
 import (
+    "github.com/dryairship/online-election-manager/utils"
     "github.com/dryairship/online-election-manager/db"
+    "github.com/gin-gonic/gin"
+    "net/http"
 )
 
 var ElectionDb db.ElectionDatabase
@@ -27,3 +30,32 @@ func CanMailBeSentToStudent(roll string) (bool, error) {
     }
 }
 
+func SendMailToStudent(c *gin.Context) {
+    roll := c.Param("roll")
+    _, err := CanMailBeSentToStudent(roll)
+    if err != nil {
+        c.String(http.StatusBadRequest, err.Error())
+        return
+    }
+    
+    skeleton, err := ElectionDb.FindStudentSkeleton(roll)
+    if err != nil {
+        c.String(http.StatusNotFound, "Invalid Roll Number. Student does not exist.")
+        return
+    }
+    
+    voter := skeleton.CreateVoter(utils.GetRandomAuthCode())
+    recipient := voter.GetMailRecipient()
+    err = utils.SendMailTo(&recipient)
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Mailer Utility is not working.")
+        return
+    } else {
+        err = ElectionDb.AddNewVoter(&voter)
+        if err != nil {
+            c.String(http.StatusInternalServerError, "Database error.")
+            return
+        }
+    }
+    c.String(http.StatusAccepted, "Verification Mail successfully sent to "+voter.Email)
+}
