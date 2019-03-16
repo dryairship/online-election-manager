@@ -2,12 +2,18 @@ var userPassword;
 
 function attemptLogin(){
     console.log("Called");
-    var data = $('#loginform').serialize();
+    var data = $('#loginform').serializeArray();
+    var roll = data[0].value;
+    var pass = data[1].value;
+    var passHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(pass));
     console.log(data);
     $.ajax({
         type: "POST",
-        url: "/login",
-        data: data,
+        url: "/users/login",
+        data: $.param({
+                'roll':roll,
+                'pass':passHash
+            }),
         cache: false,
         success: function(response){
             console.log("Success");
