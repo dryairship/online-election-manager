@@ -16,6 +16,12 @@ type (
         EmailID     string
         AuthCode    string
     }
+    
+    StudentSkeleton struct {
+        Roll        string  `json:"roll"`
+        Email       string  `json:"email"`
+        Name        string  `json:"name"`
+    }
 )
 
 func (voter Voter) GetMailRecipient() MailRecipient {
