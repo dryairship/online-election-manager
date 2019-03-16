@@ -33,3 +33,9 @@ func (db ElectionDatabase) FindVoter(roll string) (models.Voter, error) {
     err := votersCollection.Find(bson.M{"roll":roll}).One(&voter)
     return voter, err
 }
+
+func (db ElectionDatabase) AddNewVoter(voter *models.Voter) error {
+    votersCollection := db.Session.DB(config.MongoDbName).C("voters")
+    err := votersCollection.Insert(&voter)
+    return err
+}
