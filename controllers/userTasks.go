@@ -97,16 +97,21 @@ func SendMailToStudent(c *gin.Context) {
     c.String(http.StatusAccepted, "Verification Mail successfully sent<br>to "+voter.Email)
 }
 
-func SessionLogin(c *gin.Context){
-    if c.PostForm("roll") == "180561" {
-        c.JSON(200, gin.H{
-            "success": 1,
-            "roll": c.PostForm("roll"),
-            "pass": c.PostForm("password"),
-        })
-    } else {
-        c.JSON(200, gin.H{
-            "success": 0,
-        })
+func CheckUserLogin(c *gin.Context) {
+    roll := c.PostForm("roll")
+    passHash := c.PostForm("pass")
+    
+    voter, err := ElectionDb.FindVoter(roll)
+    if err != nil {
+        c.String(http.StatusForbidden, "This student has not registered.")
+        return
     }
+    
+    if voter.Password != passHash {
+        c.String(http.StatusForbidden, "Invalid Password.")
+        return
+    }
+    
+    c.String(http.StatusOK, "Login Successful.")
 }
+
