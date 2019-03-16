@@ -1,25 +1,26 @@
 package main
 
 import (
+    "fmt"
+    "os"
     "github.com/gin-gonic/gin"
-    "github.com/gin-gonic/contrib/static"
+    "github.com/dryairship/online-election-manager/utils"
+    "github.com/dryairship/online-election-manager/router"
+    "github.com/dryairship/online-election-manager/db"
+    "github.com/dryairship/online-election-manager/config"
+    "github.com/dryairship/online-election-manager/controllers"
 )
 
 func main() {
     r := gin.Default()
-    r.POST("/login", func(c *gin.Context) {
-        if c.PostForm("roll") == "180561" {
-            c.JSON(200, gin.H{
-                "success": 1,
-                "roll": c.PostForm("roll"),
-                "pass": c.PostForm("password"),
-            })
-        } else {
-            c.JSON(200, gin.H{
-                "success": 0,
-            })
-        }
-    })
-    r.Use(static.Serve("/",static.LocalFile("../../assets",true)))
-    r.Run(":9999")
+    router.SetUpRoutes(r)
+    utils.InitializeRandomSeed()
+    var err error
+    controllers.ElectionDb, err = db.ConnectToDatabase()
+    if err != nil {
+        fmt.Println("[ERROR] Could not establish database connection.")
+        os.Exit(1)
+    } else {
+        r.Run(config.ApplicationPort)
+    }
 }
