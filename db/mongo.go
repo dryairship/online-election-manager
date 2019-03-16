@@ -39,3 +39,9 @@ func (db ElectionDatabase) AddNewVoter(voter *models.Voter) error {
     err := votersCollection.Insert(&voter)
     return err
 }
+
+func (db ElectionDatabase) UpdateVoter(roll string, newVoter *models.Voter) error {
+    votersCollection := db.Session.DB(config.MongoDbName).C("voters")
+    err := votersCollection.Update(bson.M{"roll":roll},&newVoter)
+    return err
+}
