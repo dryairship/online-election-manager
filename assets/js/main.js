@@ -20,6 +20,32 @@ function attemptLogin(){
     return false;
 }
 
+function sendMail(){
+    console.log("sendMail Called");
+    var notif = $('#mailNotification');
+    notif.html("Sending mail...");
+    notif.css("display","block");
+    $.ajax({
+        type: "GET",
+        url: "/users/mail/"+document.getElementById("rollForAuthCode").value,
+        cache: false,
+        success: function(response){
+            notif.html(response);
+            notif.css("display","block");
+            notif.removeClass("alert-info");
+            notif.removeClass("alert-danger");
+            notif.addClass("alert-success");
+        },
+        error: function(response){
+            notif.html(response.responseText);
+            notif.css("display","block");
+            notif.removeClass("alert-info");
+            notif.removeClass("alert-success");
+            notif.addClass("alert-danger");
+        }
+    });
+}
+
 function init(){
     console.log("Initializing.");
 }
