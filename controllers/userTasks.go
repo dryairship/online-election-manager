@@ -112,6 +112,7 @@ func CheckUserLogin(c *gin.Context) {
         return
     }
     
+    utils.StartSession(c)
     c.String(http.StatusOK, "Login Successful.")
 }
 

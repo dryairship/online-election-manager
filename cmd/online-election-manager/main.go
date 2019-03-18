@@ -4,6 +4,8 @@ import (
     "fmt"
     "os"
     "github.com/gin-gonic/gin"
+    "github.com/gin-contrib/sessions"
+    "github.com/gin-contrib/sessions/cookie"
     "github.com/dryairship/online-election-manager/utils"
     "github.com/dryairship/online-election-manager/router"
     "github.com/dryairship/online-election-manager/db"
@@ -12,15 +14,19 @@ import (
 )
 
 func main() {
-    r := gin.Default()
-    router.SetUpRoutes(r)
     utils.InitializeRandomSeed()
+    
+    r := gin.Default()
+    
     var err error
     controllers.ElectionDb, err = db.ConnectToDatabase()
     if err != nil {
         fmt.Println("[ERROR] Could not establish database connection.")
         os.Exit(1)
-    } else {
-        r.Run(config.ApplicationPort)
     }
+    
+    sessionDb := cookie.NewStore([]byte(config.SessionsKey))
+    r.Use(sessions.Sessions("SessionData", sessionDb))
+    router.SetUpRoutes(r)
+    r.Run(config.ApplicationPort)
 }
