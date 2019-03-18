@@ -25,6 +25,12 @@ func main() {
         os.Exit(1)
     }
     
+    controllers.Posts, err = controllers.ElectionDb.GetPosts()
+    if err != nil {
+        fmt.Println("[ERROR] Could not set posts data.")
+        os.Exit(1)
+    }
+    
     sessionDb := cookie.NewStore([]byte(config.SessionsKey))
     r.Use(sessions.Sessions("SessionData", sessionDb))
     router.SetUpRoutes(r)
