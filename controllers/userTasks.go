@@ -1,13 +1,16 @@
 package controllers
 
 import (
+    "github.com/dryairship/online-election-manager/models"
     "github.com/dryairship/online-election-manager/utils"
     "github.com/dryairship/online-election-manager/db"
     "github.com/gin-gonic/gin"
     "net/http"
+    "regexp"
 )
 
 var ElectionDb db.ElectionDatabase
+var Posts      []models.Post
 
 type UserError struct {
     reason string
@@ -28,6 +31,31 @@ func CanMailBeSentToStudent(roll string) (bool, error) {
             return false, &UserError{"Verification mail has already<br>been sent to this student."}
         }
     }
+}
+
+func GetPostsForVoter(roll string) []models.VotablePost {
+    votablePosts := []models.VotablePost{}
+    for _, post := range Posts {
+        pattern := post.VoterRegex
+        canVote, err := regexp.MatchString(pattern, roll)
+        if err == nil && canVote {
+            votablePosts = append(votablePosts, post.ConvertToVotablePost())
+        }
+    }
+    return votablePosts
+}
+
+func GetVotablePosts(c *gin.Context){
+    roll := c.Param("roll")
+    
+    id, err := utils.GetSessionID(c)
+    if err != nil || id != roll {
+        c.String(http.StatusForbidden, "You are not authorized to use this API.")
+        return
+    }
+    
+    votablePosts := GetPostsForVoter(roll)
+    c.JSON(http.StatusOK, votablePosts)
 }
 
 func RegisterNewVoter(c *gin.Context){
