@@ -16,5 +16,10 @@ func SetUpRoutes(r *gin.Engine) {
         users.POST("/login", controllers.CheckUserLogin)
     }
     
+    election := r.Group("/election")
+    {
+        election.GET("/getVotablePosts/:roll", controllers.GetVotablePosts)
+    }
+    
     r.Use(static.Serve("/",static.LocalFile(config.AssetsPath,true)))
 }
