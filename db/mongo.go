@@ -45,3 +45,11 @@ func (db ElectionDatabase) UpdateVoter(roll string, newVoter *models.Voter) erro
     err := votersCollection.Update(bson.M{"roll":roll},&newVoter)
     return err
 }
+
+func (db ElectionDatabase) GetPosts() ([]models.Post, error){
+    postsCollection := db.Session.DB(config.MongoDbName).C("posts")
+    posts := []models.Post{}
+    err := postsCollection.Find(nil).All(&posts)
+    return posts, err
+}
+
