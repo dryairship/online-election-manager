@@ -20,6 +20,7 @@ func SetUpRoutes(r *gin.Engine) {
     {
         election.GET("/getVotablePosts/:roll", controllers.GetVotablePosts)
         election.GET("/getCandidateInfo/:roll", controllers.GetCandidateInfo)
+        election.GET("/getCandidateCard/:roll", controllers.GetCandidateCard)
     }
     
     r.Use(static.Serve("/",static.LocalFile(config.AssetsPath,true)))
