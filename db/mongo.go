@@ -53,3 +53,10 @@ func (db ElectionDatabase) GetPosts() ([]models.Post, error){
     return posts, err
 }
 
+func (db ElectionDatabase) GetCandidate(roll string) (models.Candidate, error) {
+    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
+    candidate := models.Candidate{}
+    err := candidatesCollection.Find(bson.M{"roll":roll}).One(&candidate)
+    return candidate, err
+}
+
