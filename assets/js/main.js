@@ -24,6 +24,15 @@ function attemptLogin(){
             }
         }
     });
+    setTimeout(setVoteButtonsClickable, 3000);
+}
+
+function setVoteButtonsClickable(){
+    $(".loading")[0].parentNode.removeChild($(".loading")[0]);
+    $('input#voteButton').on('click', function() {
+        var attr = this.attributes;    
+        vote(attr["postid"].value,attr["pubkey"].value,1);
+    });
 }
 
 function loadPosts(){
@@ -54,7 +63,6 @@ function loadThisPost(post, ind, allPosts){
 }
 
 function sendMail(){
-    console.log("sendMail Called");
     var notif = $('#mailNotification');
     notif.html("Sending mail...");
     notif.css("display","block");
@@ -80,7 +88,6 @@ function sendMail(){
 }
 
 function register(){
-    console.log("reg Called");
     var notif = $('#regNotification');
     var data = $('#registrationform').serializeArray();
     var roll = data[0].value;
@@ -112,7 +119,6 @@ function register(){
             }),
             cache: false,
             success: function(response){
-                console.log(response);
                 notif.html(response);
                 notif.css("display","block");
                 notif.removeClass("alert-info");
@@ -120,7 +126,6 @@ function register(){
                 notif.addClass("alert-success");
             },
             error: function(response){
-                console.log(response);
                 notif.html(response.responseText);
                 notif.css("display","block");
                 notif.removeClass("alert-info");
@@ -129,6 +134,10 @@ function register(){
             }
         });
     }
+}
+
+function vote(postid, pubkey, pref){
+    console.log("Voted for Candidate with pubkey="+pubkey+"as pref number "+pref+" on postid="+postid);
 }
 
 function init(){
