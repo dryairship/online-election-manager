@@ -1,12 +1,11 @@
 var userPassword;
+var userRoll;
 
 function attemptLogin(){
-    console.log("Called");
     var data = $('#loginform').serializeArray();
     var roll = data[0].value;
     var pass = data[1].value;
     var passHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(pass));
-    console.log(data);
     $.ajax({
         type: "POST",
         url: "/users/login",
@@ -16,12 +15,12 @@ function attemptLogin(){
             }),
         cache: false,
         success: function(response){
-            console.log("Success");
-            console.log(response);
             if(response["success"]==0){
                 document.getElementById("loginError").style="display:block";
             }else{
-                alert("Successful login");
+                userPassword = pass;
+                userRoll = roll;
+                $("body").load("home.html", loadPosts);
             }
         }
     });
