@@ -26,6 +26,33 @@ function attemptLogin(){
     });
 }
 
+function loadPosts(){
+    console.log("Loading Posts");
+    $.ajax({
+        type: "GET",
+        url: "/election/getVotablePosts/"+userRoll,
+        cache: false,
+        success: function(response){
+            response.forEach(loadThisPost);
+        }
+    });
+}
+
+function loadThisPost(post, ind, allPosts){
+    ind=ind+1;
+    var postid = "post"+ind;
+    $("#postsTable>tbody").append("<tr><td align='center' id='"+postid+"'></td></tr>");
+    $("#"+postid).load("candidatePanel.html", function(){
+        $("#"+postid+">#candidatePanel>.postname").html(post["PostName"])
+        post["Candidates"].forEach(function(candidate, cid, allC){
+            cid = cid+1;
+            var candid = postid+"-cand"+cid;
+            $('#'+postid+'>#candidatePanel').append("<div id='"+candid+"'></div><pre>  </pre>");
+            $('#'+candid).load("election/getCandidateCard/"+candidate);
+        });
+    });
+}
+
 function sendMail(){
     console.log("sendMail Called");
     var notif = $('#mailNotification');
