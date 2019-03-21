@@ -1,6 +1,8 @@
 var userPassword;
 var userRoll;
 var allPosts;
+var votesCandidateNames = [["MEOW"]];
+var votesCandidatePublicKeys = [["MEOW"]];
 
 function attemptLogin(){
     var data = $('#loginform').serializeArray();
@@ -170,6 +172,16 @@ function vote(postid, pubkey, pref){
         else el.remove()
     });
     showVoted(candName,pref, postid);
+    var intID = parseInt(postid);
+    var intPref = parseInt(pref);
+    if(votesCandidateNames[intID]==undefined){
+        votesCandidateNames[intID] = []
+    }
+    if(votesCandidatePublicKeys[intID]==undefined){
+        votesCandidatePublicKeys[intID] = []
+    }
+    votesCandidateNames[intID][intPref] = candName;
+    votesCandidatePublicKeys[intID][intPref] = pubkey;
 }
 
 function showVoted(candName, pref, postid){
