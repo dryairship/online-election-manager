@@ -15,13 +15,13 @@ function attemptLogin(){
             }),
         cache: false,
         success: function(response){
-            if(response["success"]==0){
-                document.getElementById("loginError").style="display:block";
-            }else{
-                userPassword = pass;
-                userRoll = roll;
-                $("body").load("home.html", loadPosts);
-            }
+            userPassword = pass;
+            userRoll = roll;
+            $("body").load("home.html", loadPosts);
+        },
+        error: function(response){
+            document.getElementById("loginError").style="display:block";
+            document.getElementById("loginError").innerHTML=response.responseText;
         }
     });
     setTimeout(setVoteButtonsClickable, 3000);
