@@ -77,6 +77,8 @@ function reloadPost(postid){
             post = el;
         }
     });
+    votesCandidateNames[parseInt(postid)] = [];
+    votesCandidatePublicKeys[parseInt(postid)] = [];
     $("#post"+postid).load("candidatePanel.html", function(){
         $("#post"+postid+">#candidatePanel>.postname").html(post["PostName"])
         post["Candidates"].forEach(function(candidate, cid, allC){
@@ -193,6 +195,20 @@ function showVoted(candName, pref, postid){
     $("#post"+postid+" .list-group").append("<li id='pref"+pref+"' class='list-group-item'>"+pref+") "+candName+"</li>");
 }
 
+function confirmVotes(){
+    console.log("Confirming");
+    $("#confirmVotes .modal-body").html("");
+    allPosts.forEach(function(post, ind, all){
+        var pname = post["PostName"];
+        var pid = post["PostID"];
+        $("#confirmVotes .modal-body").append("<dl id='votes"+pid+"'><dt>"+pname+"</dt></dl>");
+        votesCandidateNames[parseInt(pid)].forEach(function(cand, indC, allC){
+            $("#votes"+pid).append("<dd>"+indC+") "+cand+"</dd>");
+        });
+        
+    });
+}
+
 function init(){
     console.log("Initializing.");
 }
@@ -209,3 +225,4 @@ function showLoginForm(){
 $(function(){
     $("body").load("login.html");
 });
+
