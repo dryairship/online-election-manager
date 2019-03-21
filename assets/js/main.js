@@ -25,15 +25,20 @@ function attemptLogin(){
             document.getElementById("loginError").innerHTML=response.responseText;
         }
     });
-    setTimeout(setVoteButtonsClickable, 3000);
+    setTimeout(function(){setVoteButtonsClickable("all");}, 3000);
 }
 
-function setVoteButtonsClickable(){
-    $(".loading")[0].parentNode.removeChild($(".loading")[0]);
-    $('input#voteButton').on('click', function() {
-        var attr = this.attributes;    
-        vote(attr["postid"].value,attr["pubkey"].value,1);
-    });
+function setVoteButtonsClickable(postid){
+    if(postid=="all"){
+        $('input#voteButton').on('click', function() {
+            vote(this);
+        });
+        $(".loading")[0].remove();
+    }else{
+        $('#post'+postid+' #voteButton').on('click', function() {
+            vote(this);
+        });
+    }
 }
 
 function loadPosts(){
@@ -75,6 +80,7 @@ function reloadPost(postid){
             $('#'+candid).load("election/getCandidateCard/"+candidate);
         });
     });
+    setTimeout(function(){setVoteButtonsClickable(postid)}, 1000);
 }
 
 function sendMail(){
