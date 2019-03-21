@@ -98,7 +98,7 @@ body,html {
 	width:100%;
 }
 #postsTable {
-	align:center;
+	display: table !important;
 	background-color:teal;
 	border-radius:30px;
 	width:98%

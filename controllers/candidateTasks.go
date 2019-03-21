@@ -23,7 +23,7 @@ func GetCandidateInfo(c *gin.Context) {
 func GetCandidateCard(c *gin.Context) {
     roll := c.Param("roll")
     
-    card := "<div class=\"user_card mt-5 mb-3\" style=\"width:230px\">"
+    card := "<div class=\"user_card my-5 mx-3\" style=\"width:230px\">"
     card += "<div class=\"d-flex justify-content-center\" align=\"center\">"
     card += "<div class=\"image_container\">"
     card += "<img id=\"photo\" src=\"logo.jpg\" class=\"round_image\" alt=\"Candidate's Photo\">"
@@ -33,7 +33,7 @@ func GetCandidateCard(c *gin.Context) {
     card += "<h3 id=\"candidateName\">%s</h3><br>"
     card += "<a target=\"_blank\" id=\"manifestoLink\" class=\"btn btn-light\" href=\"%s\">Manifesto</a><br><br>"
     card += "<input id=\"voteButton\" type=\"button\" postid=\"%s\" pubkey=\"%s\" class=\"btn btn-primary\" value=\"1st Preference\"/>"
-    card += "</div></div></div></div><pre>  </pre>"
+    card += "</div></div></div></div>"
         
     candidate, err := ElectionDb.GetCandidate(roll)
     if err != nil {

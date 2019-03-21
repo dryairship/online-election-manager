@@ -159,7 +159,7 @@ function register(){
     }
 }
 
-function vote(postid, pubkey, pref){
+function vote(button){
     var postid = button.attributes["postid"].value;
     var pubkey = button.attributes["pubkey"].value;
     var pref = button.value[0];
@@ -203,5 +203,5 @@ function showLoginForm(){
 }
 
 $(function(){
-    $("body").load("login.html")
+    $("body").load("login.html");
 });
