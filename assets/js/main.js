@@ -71,8 +71,12 @@ function loadThisPost(post, ind, all){
 }
 
 function reloadPost(postid){
-    var id = parseInt(postid);
-    var post = allPosts[id-1];
+    var post;
+    allPosts.forEach(function(el,ind,all){
+        if(el["PostID"]==postid){
+            post = el;
+        }
+    });
     $("#post"+postid).load("candidatePanel.html", function(){
         $("#post"+postid+">#candidatePanel>.postname").html(post["PostName"])
         post["Candidates"].forEach(function(candidate, cid, allC){
