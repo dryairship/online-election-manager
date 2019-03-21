@@ -1,5 +1,6 @@
 var userPassword;
 var userRoll;
+var allPosts;
 
 function attemptLogin(){
     var data = $('#loginform').serializeArray();
@@ -42,14 +43,29 @@ function loadPosts(){
         url: "/election/getVotablePosts/"+userRoll,
         cache: false,
         success: function(response){
+            allPosts = response;
             response.forEach(loadThisPost);
         }
     });
 }
 
-function loadThisPost(post, ind, allPosts){
+function loadThisPost(post, ind, all){
     var postid = post["PostID"];
     $("#postsTable>tbody").append("<tr><td align='center' id='post"+postid+"'></td></tr>");
+    $("#post"+postid).load("candidatePanel.html", function(){
+        $("#post"+postid+">#candidatePanel>.postname").html(post["PostName"])
+        post["Candidates"].forEach(function(candidate, cid, allC){
+            cid = cid+1;
+            var candid = "post"+postid+"-cand"+cid;
+            $('#post'+postid+'>#candidatePanel').append("<div id='"+candid+"'></div>");
+            $('#'+candid).load("election/getCandidateCard/"+candidate);
+        });
+    });
+}
+
+function reloadPost(postid){
+    var id = parseInt(postid);
+    var post = allPosts[id-1];
     $("#post"+postid).load("candidatePanel.html", function(){
         $("#post"+postid+">#candidatePanel>.postname").html(post["PostName"])
         post["Candidates"].forEach(function(candidate, cid, allC){
