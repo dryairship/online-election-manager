@@ -136,7 +136,23 @@ function register(){
 }
 
 function vote(postid, pubkey, pref){
-    console.log("Voted for Candidate with pubkey="+pubkey+"as pref number "+pref+" on postid="+postid);
+    var postid = button.attributes["postid"].value;
+    var pubkey = button.attributes["pubkey"].value;
+    var pref = button.value[0];
+    var candName = button.parentNode.firstChild.textContent;
+    button.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
+    console.log("Voted for Candidate "+candName+" with pubkey="+pubkey+" as pref number "+pref+" on postid="+postid);
+    document.querySelectorAll("#post"+postid+" #voteButton").forEach(function(el, ind, all){
+        if(el.value[0]=="1")    el.value="2nd Preference";
+        else if(el.value[0]=="2")    el.value="3rd Preference";
+        else el.remove()
+    });
+    showVoted(candName,pref, postid);
+}
+
+function showVoted(candName, pref, postid){
+    $("#post"+postid+" #heading").html("Preferences : <a href='#' onclick='reloadPost("+postid+"); return false;' class='badge badge-danger badge-pill'>Reset Preferences</a>");
+    $("#post"+postid+" .list-group").append("<li id='pref"+pref+"' class='list-group-item'>"+pref+") "+candName+"</li>");
 }
 
 function init(){
