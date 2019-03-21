@@ -48,15 +48,14 @@ function loadPosts(){
 }
 
 function loadThisPost(post, ind, allPosts){
-    ind=ind+1;
-    var postid = "post"+ind;
-    $("#postsTable>tbody").append("<tr><td align='center' id='"+postid+"'></td></tr>");
-    $("#"+postid).load("candidatePanel.html", function(){
-        $("#"+postid+">#candidatePanel>.postname").html(post["PostName"])
+    var postid = post["PostID"];
+    $("#postsTable>tbody").append("<tr><td align='center' id='post"+postid+"'></td></tr>");
+    $("#post"+postid).load("candidatePanel.html", function(){
+        $("#post"+postid+">#candidatePanel>.postname").html(post["PostName"])
         post["Candidates"].forEach(function(candidate, cid, allC){
             cid = cid+1;
-            var candid = postid+"-cand"+cid;
-            $('#'+postid+'>#candidatePanel').append("<div id='"+candid+"'></div><pre>  </pre>");
+            var candid = "post"+postid+"-cand"+cid;
+            $('#post'+postid+'>#candidatePanel').append("<div id='"+candid+"'></div>");
             $('#'+candid).load("election/getCandidateCard/"+candidate);
         });
     });
