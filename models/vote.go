@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 type (
     Vote struct {
         PostID          string  `json:"postid"`
@@ -20,14 +22,14 @@ type (
 
 func (receivedVote ReceivedVote) GetVote() Vote {
     return Vote {
-        PostID: string(receivedVote.PostID),
+        PostID: fmt.Sprintf("%d",receivedVote.PostID),
         Data:   receivedVote.VoteData,
     }
 }
 
 func (receivedVote ReceivedVote) GetBallotID() BallotID {
     return BallotID {
-        PostID:         string(receivedVote.PostID),
+        PostID:         fmt.Sprintf("%d",receivedVote.PostID),
         BallotString:   receivedVote.BallotString,
     }
 }
