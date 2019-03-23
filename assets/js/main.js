@@ -209,6 +209,12 @@ function confirmVotes(){
     });
 }
 
+function getRandomString(){
+    var randBytes = sjcl.random.randomWords(8);
+    var randHex = sjcl.codec.hex.fromBits(randBytes);
+    return randHex;
+}
+
 function init(){
     console.log("Initializing.");
 }
@@ -224,5 +230,8 @@ function showLoginForm(){
 
 $(function(){
     $("body").load("login.html");
+    var arr = new Uint32Array(128);
+    crypto.getRandomValues(arr);
+    sjcl.random.addEntropy(arr, 1024, "crypto.randomBytes");
 });
 
