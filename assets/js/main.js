@@ -3,6 +3,9 @@ var userRoll;
 var allPosts;
 var votesCandidateNames = [["MEOW"]];
 var votesCandidatePublicKeys = [["MEOW"]];
+var ballotIDs = [];
+var encryptedBallotIDs = [];
+var finalVotes = [];
 
 function attemptLogin(){
     var data = $('#loginform').serializeArray();
@@ -205,7 +208,6 @@ function confirmVotes(){
         votesCandidateNames[parseInt(pid)].forEach(function(cand, indC, allC){
             $("#votes"+pid).append("<dd>"+indC+") "+cand+"</dd>");
         });
-        
     });
 }
 
@@ -243,6 +245,57 @@ function encryptWithPassword(something){
     return sjcl.encrypt(userPassword, something);
 }
 
+function submitVotes(){
+    encryptVotes();
+    sendVotes();
+}
+
+function encryptVotes(){
+    allPosts.forEach(function(post, ind, all){
+        var ballotID = getRandomString();
+        var pid = parseInt(post["PostID"]);
+        ballotIDs[pid] = ballotID;
+        encryptedBallotIDs[pid] = encryptWithPassword(ballotID);
+        console.log(ballotID+" used for post of "+post["PostName"]);
+        var currentVote = votesCandidateNames[pid].join("$").concat("$").concat(ballotID);
+        if(votesCandidatePublicKeys[pid][3]!=undefined){
+            currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][3], currentVote);
+        }
+        if(votesCandidatePublicKeys[pid][2]!=undefined){
+            currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][2], currentVote);
+        }
+        if(votesCandidatePublicKeys[pid][1]!=undefined){
+            currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][1], currentVote);
+        }
+        finalVotes[pid] = currentVote;
+    });
+}
+
+function sendVotes(){
+    var voteData = [];
+    allPosts.forEach(function(post, ind, all){
+        var pid = parseInt(post["PostID"]);
+        voteData = voteData.concat({
+            "PostID"        : pid,
+            "BallotString"  : encryptedBallotIDs[pid],
+            "VoteData"      : finalVotes[pid]
+        });
+    });
+    $.ajax({
+        type: "POST",
+        url: "/users/submitVote",
+        dataType: 'json',
+        data: JSON.stringify(voteData),
+        cache: false,
+        success: function(response){
+            console.log("Submitted");
+        },
+        error: function(response){
+            console.log("ERROR : "+response.responseText);
+        }
+    });
+}
+
 function getRandomString(){
     var randBytes = sjcl.random.randomWords(8);
     var randHex = sjcl.codec.hex.fromBits(randBytes);
@@ -252,6 +305,7 @@ function getRandomString(){
 function init(){
     console.log("Initializing.");
 }
+
 function showRegistrationForm(){
     document.getElementById("loginContainer").style="display:none";
     document.getElementById("registrationContainer").style="display:block";
