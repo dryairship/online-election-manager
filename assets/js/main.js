@@ -209,6 +209,40 @@ function confirmVotes(){
     });
 }
 
+function serializePublicKey(pub){
+    return sjcl.codec.base64.fromBits(pub.get().x.concat(pub.get().y));
+}
+
+function serializePrivateKey(priv){
+    return sjcl.codec.base64.fromBits(priv.get());
+}
+
+function unserializePublicKey(serPub){
+    return new sjcl.ecc.elGamal.publicKey(
+        sjcl.ecc.curves.c256, 
+        sjcl.codec.base64.toBits(serPub)
+    );
+}
+
+function unserializePrivateKey(serPriv){
+    return new sjcl.ecc.elGamal.secretKey(
+        sjcl.ecc.curves.c256,
+        sjcl.ecc.curves.c256.field.fromBits(sjcl.codec.base64.toBits(serPriv))
+    );
+}
+
+function generateKeyPair(){
+    return sjcl.ecc.elGamal.generateKeys(256);
+}
+
+function decryptFromPassword(something){
+    return sjcl.decrypt(userPassword, something);
+}
+
+function encryptWithPassword(something){
+    return sjcl.encrypt(userPassword, something);
+}
+
 function getRandomString(){
     var randBytes = sjcl.random.randomWords(8);
     var randHex = sjcl.codec.hex.fromBits(randBytes);
