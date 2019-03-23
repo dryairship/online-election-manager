@@ -2,6 +2,13 @@ package models
 
 type (
     Vote struct {
-        Data    string  `json:"data"`
+        PostID          string  `json:"postid"`
+        Data            string  `json:"data"`
     }
-) 
+    
+    BallotID struct {
+        PostID          string
+        BallotString    string
+    }
+)
+
