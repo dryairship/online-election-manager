@@ -60,3 +60,9 @@ func (db ElectionDatabase) GetCandidate(roll string) (models.Candidate, error) {
     return candidate, err
 }
 
+func (db ElectionDatabase) InsertVote(vote *models.Vote) error {
+    votesCollection := db.Session.DB(config.MongoDbName).C("votes")
+    err := votesCollection.Insert(&vote)
+    return err
+}
+
