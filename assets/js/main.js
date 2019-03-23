@@ -151,11 +151,11 @@ function register(){
             }),
             cache: false,
             success: function(response){
-                notif.html(response);
-                notif.css("display","block");
-                notif.removeClass("alert-info");
-                notif.removeClass("alert-danger");
-                notif.addClass("alert-success");
+            showLoginForm();
+                $("#loginError").removeClass("alert-danger");
+                $("#loginError").addClass("alert-success");
+                document.getElementById("loginError").style="display:block";
+                document.getElementById("loginError").innerHTML="Registration successful.<br>You may now log in.";
             },
             error: function(response){
                 notif.html(response.responseText);
@@ -283,7 +283,7 @@ function sendVotes(){
     });
     $.ajax({
         type: "POST",
-        url: "/users/submitVote",
+        url: "/election/submitVote",
         dataType: 'json',
         data: JSON.stringify(voteData),
         cache: false,
