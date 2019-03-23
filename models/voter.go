@@ -6,13 +6,13 @@ import (
 
 type (
     Voter struct {
-        Roll        string  `json:"roll"`
-        Name        string  `json:"name"`
-        Email       string  `json:"email"`
-        Password    string  `json:"password"`
-        AuthCode    string  `json:"authcode"`
-        BallotID    string  `json:"ballotid"`
-        Voted       bool    `json:"voted"`
+        Roll        string      `json:"roll"`
+        Name        string      `json:"name"`
+        Email       string      `json:"email"`
+        Password    string      `json:"password"`
+        AuthCode    string      `json:"authcode"`
+        BallotID    []BallotID  `json:"ballotid"`
+        Voted       bool        `json:"voted"`
     }
 
     MailRecipient struct {
@@ -43,7 +43,7 @@ func (skeleton StudentSkeleton) CreateVoter(authcode string) Voter {
         Email:      skeleton.Email+config.MailSuffix,
         Password:   "",
         AuthCode:   authcode,
-        BallotID:   "",
+        BallotID:   nil,
         Voted:      false,
     }
 }
