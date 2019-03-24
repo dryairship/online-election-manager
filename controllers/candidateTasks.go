@@ -26,7 +26,7 @@ func GetCandidateCard(c *gin.Context) {
     card := "<div class=\"user_card my-5 mx-3\" style=\"width:230px\">"
     card += "<div class=\"d-flex justify-content-center\" align=\"center\">"
     card += "<div class=\"image_container\">"
-    card += "<img id=\"photo\" src=\"logo.jpg\" class=\"round_image\" alt=\"Candidate's Photo\">"
+    card += "<img id=\"photo\" src=\"https://oa.cc.iitk.ac.in/Oa/Jsp/Photo/%s_0.jpg\" class=\"round_image\" alt=\"Candidate's Photo\">"
     card += "</div>"
     card += "<div class=\"d-flex justify-content-center form_container\">"
     card += "<div class=\"card-body\">"
@@ -41,6 +41,6 @@ func GetCandidateCard(c *gin.Context) {
         return
     }
     
-    formattedCard := fmt.Sprintf(card,candidate.Name,candidate.Manifesto, candidate.PostID, candidate.PublicKey)
+    formattedCard := fmt.Sprintf(card, roll, candidate.Name, candidate.Manifesto, candidate.PostID, candidate.PublicKey)
     c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(formattedCard))
 }
