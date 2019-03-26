@@ -22,16 +22,22 @@ function attemptLogin(){
             }),
         cache: false,
         success: function(response){
+            userData = response;
             userPassword = pass;
             userRoll = roll;
-            $("body").load("home.html", loadPosts);
+            if(userData["Voted"]){
+                $("body").load("home.html", showUserHasVoted);
+            }else{
+                $("body").load("home.html", loadPosts);
+            }
         },
         error: function(response){
             document.getElementById("loginError").style="display:block";
             document.getElementById("loginError").innerHTML=response.responseText;
         }
     });
-    setTimeout(function(){setVoteButtonsClickable("all");}, 3000);
+    if(!userData["Voted"])
+        setTimeout(function(){setVoteButtonsClickable("all");}, 3000);
 }
 
 function setVoteButtonsClickable(postid){
