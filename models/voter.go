@@ -26,6 +26,13 @@ type (
         Email       string  `json:"email"`
         Name        string  `json:"name"`
     }
+    
+    SimplifiedVoter struct {
+        Roll        string
+        Name        string
+        BallotID    []BallotID
+        Voted       bool
+    }
 )
 
 func (voter Voter) GetMailRecipient() MailRecipient {
@@ -45,5 +52,14 @@ func (skeleton StudentSkeleton) CreateVoter(authcode string) Voter {
         AuthCode:   authcode,
         BallotID:   nil,
         Voted:      false,
+    }
+}
+
+func (voter Voter) Simplify() SimplifiedVoter {
+    return SimplifiedVoter {
+        Roll:       voter.Roll,
+        Name:       voter.Name,
+        BallotID:   voter.BallotID,
+        Voted:      voter.Voted,
     }
 }
