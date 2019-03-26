@@ -32,6 +32,7 @@ type (
         Name        string
         BallotID    []BallotID
         Voted       bool
+        CEOKey      string
     }
 )
 
