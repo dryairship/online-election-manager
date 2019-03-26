@@ -7,6 +7,7 @@ var votesCandidatePublicKeys = [["MEOW"]];
 var ballotIDs = [];
 var encryptedBallotIDs = [];
 var finalVotes = [];
+var unserializedPublicKeyOfCEO;
 
 function attemptLogin(){
     var data = $('#loginform').serializeArray();
@@ -46,6 +47,7 @@ function setVoteButtonsClickable(postid){
             vote(this);
         });
         $(".loading")[0].remove();
+        unserializedPublicKeyOfCEO = unserializePublicKey(userData.CEOKey);
     }else{
         $('#post'+postid+' #voteButton').on('click', function() {
             vote(this);
@@ -210,11 +212,15 @@ function confirmVotes(){
     $("#confirmVotes .modal-body").html("");
     allPosts.forEach(function(post, ind, all){
         var pname = post["PostName"];
-        var pid = post["PostID"];
+        var pid = parseInt(post["PostID"]);
         $("#confirmVotes .modal-body").append("<dl id='votes"+pid+"'><dt>"+pname+"</dt></dl>");
-        votesCandidateNames[parseInt(pid)].forEach(function(cand, indC, allC){
-            $("#votes"+pid).append("<dd>"+indC+") "+cand+"</dd>");
-        });
+        if(votesCandidateNames[pid]==undefined || votesCandidateNames[pid].length==0){
+            $("#votes"+pid).append("<dd>NOTA</dd>");
+        }else{
+            votesCandidateNames[pid].forEach(function(cand, indC, allC){
+                $("#votes"+pid).append("<dd>"+indC+") "+cand+"</dd>");
+            });
+        }
     });
 }
 
@@ -281,6 +287,7 @@ function encryptVotes(){
         if(votesCandidatePublicKeys[pid][1]!=undefined){
             currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][1], currentVote);
         }
+        currentVote = sjcl.encrypt(unserializedPublicKeyOfCEO, currentVote);
         finalVotes[pid] = currentVote;
     });
 }

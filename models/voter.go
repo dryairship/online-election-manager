@@ -61,5 +61,6 @@ func (voter Voter) Simplify() SimplifiedVoter {
         Name:       voter.Name,
         BallotID:   voter.BallotID,
         Voted:      voter.Voted,
+        CEOKey:     config.PublicKeyOfCEO,
     }
 }
