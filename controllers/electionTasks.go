@@ -59,5 +59,5 @@ func SubmitVote(c *gin.Context) {
         return
     }
     
-    c.String(http.StatusOK, "Votes successfully submitted.")
+    c.JSON(http.StatusOK, "Votes successfully submitted.")
 }

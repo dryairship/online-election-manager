@@ -1,5 +1,6 @@
 var userPassword;
 var userRoll;
+var userData;
 var allPosts;
 var votesCandidateNames = [["MEOW"]];
 var votesCandidatePublicKeys = [["MEOW"]];
@@ -289,6 +290,7 @@ function sendVotes(){
         cache: false,
         success: function(response){
             console.log("Submitted");
+            showUserHasVoted();
         },
         error: function(response){
             console.log("ERROR : "+response.responseText);
@@ -314,6 +316,11 @@ function showRegistrationForm(){
 function showLoginForm(){
     document.getElementById("loginContainer").style="display:block";
     document.getElementById("registrationContainer").style="display:none";
+}
+
+function showUserHasVoted(){
+    $("body").addClass("d-flex");
+    $("body").html("<div class=\"alert alert-success mx-auto my-auto d-inline-flex\">Your vote has been submitted.</div>");
 }
 
 $(function(){
