@@ -141,6 +141,8 @@ func CheckUserLogin(c *gin.Context) {
     }
     
     utils.StartSession(c)
-    c.String(http.StatusOK, "Login Successful.")
+    
+    simplifiedVoter := voter.Simplify()
+    c.JSON(http.StatusOK, &simplifiedVoter)
 }
 
