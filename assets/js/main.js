@@ -27,8 +27,10 @@ function attemptLogin(){
             userRoll = roll;
             if(userData["Voted"]){
                 $("body").load("home.html", showUserHasVoted);
+                decryptBallotIDs();
             }else{
                 $("body").load("home.html", loadPosts);
+                setTimeout(function(){setVoteButtonsClickable("all");}, 3000);
             }
         },
         error: function(response){
@@ -36,8 +38,6 @@ function attemptLogin(){
             document.getElementById("loginError").innerHTML=response.responseText;
         }
     });
-    if(!userData["Voted"])
-        setTimeout(function(){setVoteButtonsClickable("all");}, 3000);
 }
 
 function setVoteButtonsClickable(postid){
@@ -215,6 +215,13 @@ function confirmVotes(){
         votesCandidateNames[parseInt(pid)].forEach(function(cand, indC, allC){
             $("#votes"+pid).append("<dd>"+indC+") "+cand+"</dd>");
         });
+    });
+}
+
+function decryptBallotIDs(){
+    userData.BallotID.forEach(function(el, ind, all){
+        encryptedBallotIDs[el.PostID] = el.BallotString;
+        ballotIDs[el.PostID] = decryptFromPassword(el.BallotString);
     });
 }
 
