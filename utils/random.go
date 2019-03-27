@@ -1,6 +1,7 @@
 package utils
 
 import (
+    "github.com/dryairship/online-election-manager/config"
     "math/rand"
     "time"
 )
@@ -17,4 +18,8 @@ func GetRandomAuthCode() string {
         b[i] = letters[rand.Int63()%int64(len(letters))]
     }
     return string(b)
+}
+
+func GetRandomTimeDelay() time.Duration {
+    return time.Duration(rand.Intn(config.MaxTimeDelay)) * time.Second
 }
