@@ -5,6 +5,7 @@ import (
     "github.com/dryairship/online-election-manager/utils"
     "github.com/gin-gonic/gin"
     "net/http"
+    "time"
 )
 
 func SubmitVote(c *gin.Context) {
@@ -36,11 +37,10 @@ func SubmitVote(c *gin.Context) {
     for i, receivedVote := range receivedVotes {
         ballotID[i] = receivedVote.GetBallotID()
         vote := receivedVote.GetVote()
-        err = ElectionDb.InsertVote(&vote)
-        if err != nil {
-            c.String(http.StatusInternalServerError, "Database Error")
-            return
-        }
+        go func() {
+            time.Sleep(utils.GetRandomTimeDelay())
+            ElectionDb.InsertVote(&vote)
+        }()
     }
     
     newVoter := models.Voter{
