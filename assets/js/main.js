@@ -179,7 +179,8 @@ function register(){
 
 function vote(button){
     var postid = button.attributes["postid"].value;
-    var pubkey = button.attributes["pubkey"].value;
+    var serpubkey = button.attributes["pubkey"].value;
+    var pubkey = unserializePublicKey(serpubkey);
     var pref = button.value[0];
     var candName = button.parentNode.firstChild.textContent;
     button.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
