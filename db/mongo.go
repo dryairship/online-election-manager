@@ -79,3 +79,9 @@ func (db ElectionDatabase) InsertCEO(ceo *models.CEO) error {
     return err
 }
 
+func (db ElectionDatabase) UpdateCEO(newCEO *models.CEO) error {
+    ceoCollection := db.Session.DB(config.MongoDbName).C("ceo")
+    err := ceoCollection.Update(bson.M{"username":"CEO"}, &newCEO)
+    return err
+}
+

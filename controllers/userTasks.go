@@ -63,6 +63,11 @@ func RegisterNewVoter(c *gin.Context){
     passHash := c.PostForm("pass")
     authCode := c.PostForm("auth")
     
+    if roll == "CEO" {
+        RegisterCEO(c)
+        return
+    }
+    
     voter, err := ElectionDb.FindVoter(roll)
     if err != nil {
         c.String(http.StatusForbidden, "You need to get a verification<br>mail before you register.")

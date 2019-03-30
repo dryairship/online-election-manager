@@ -35,3 +35,34 @@ func SendMailToCEO(c *gin.Context) {
     }
     c.String(http.StatusAccepted, "Verification Mail successfully sent<br>to "+ceo.Email)
 }
+
+func RegisterCEO(c *gin.Context) {
+    passHash := c.PostForm("pass")
+    authCode := c.PostForm("auth")
+    
+    ceo, err := ElectionDb.GetCEO()
+    if err != nil {
+        c.String(http.StatusForbidden, "You need to get a verification<br>mail before you register.")
+        return
+    }
+    
+    if ceo.AuthCode == "" {
+        c.String(http.StatusForbidden, "CEO has already registered.")
+        return
+    }
+    
+    if ceo.AuthCode != authCode {
+        c.String(http.StatusBadRequest, "Wrong authentication code.")
+        return
+    }
+    
+    ceo.Password = passHash
+    ceo.AuthCode = ""
+    
+    err = ElectionDb.UpdateCEO(&ceo)
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Database Error")
+    }else{
+        c.String(http.StatusAccepted, "CEO successfully registered.")
+    }
+}
