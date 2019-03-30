@@ -97,6 +97,12 @@ func RegisterNewVoter(c *gin.Context){
 
 func SendMailToStudent(c *gin.Context) {
     roll := c.Param("roll")
+    
+    if roll == "CEO" {
+        SendMailToCEO(c)
+        return
+    }
+    
     _, err := CanMailBeSentToStudent(roll)
     if err != nil {
         c.String(http.StatusBadRequest, err.Error())
