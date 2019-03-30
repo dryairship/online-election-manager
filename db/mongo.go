@@ -66,3 +66,16 @@ func (db ElectionDatabase) InsertVote(vote *models.Vote) error {
     return err
 }
 
+func (db ElectionDatabase) GetCEO() (models.CEO, error) {
+    ceoCollection := db.Session.DB(config.MongoDbName).C("ceo")
+    ceo := models.CEO{}
+    err := ceoCollection.Find(nil).One(&ceo)
+    return ceo, err
+}
+
+func (db ElectionDatabase) InsertCEO(ceo *models.CEO) error {
+    ceoCollection := db.Session.DB(config.MongoDbName).C("ceo")
+    err := ceoCollection.Insert(&ceo)
+    return err
+}
+
