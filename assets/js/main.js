@@ -31,7 +31,7 @@ function attemptLogin(){
                 decryptBallotIDs();
             }else{
                 $("body").load("home.html", loadPosts);
-                setTimeout(function(){setVoteButtonsClickable("all");}, 3000);
+                unserializedPublicKeyOfCEO = unserializePublicKey(userData.CEOKey);
             }
         },
         error: function(response){
@@ -39,20 +39,6 @@ function attemptLogin(){
             document.getElementById("loginError").innerHTML=response.responseText;
         }
     });
-}
-
-function setVoteButtonsClickable(postid){
-    if(postid=="all"){
-        $('input#voteButton').on('click', function() {
-            vote(this);
-        });
-        $(".loading")[0].remove();
-        unserializedPublicKeyOfCEO = unserializePublicKey(userData.CEOKey);
-    }else{
-        $('#post'+postid+' #voteButton').on('click', function() {
-            vote(this);
-        });
-    }
 }
 
 function loadPosts(){
@@ -77,7 +63,11 @@ function loadThisPost(post, ind, all){
             cid = cid+1;
             var candid = "post"+postid+"-cand"+cid;
             $('#post'+postid+'>#candidatePanel').append("<div id='"+candid+"'></div>");
-            $('#'+candid).load("election/getCandidateCard/"+candidate);
+            $('#'+candid).load("election/getCandidateCard/"+candidate, function(){
+                $('#'+candid+' #voteButton').on('click', function() {
+                    vote(this);
+                });
+            });
         });
     });
 }
@@ -97,10 +87,13 @@ function reloadPost(postid){
             cid = cid+1;
             var candid = "post"+postid+"-cand"+cid;
             $('#post'+postid+'>#candidatePanel').append("<div id='"+candid+"'></div>");
-            $('#'+candid).load("election/getCandidateCard/"+candidate);
+            $('#'+candid).load("election/getCandidateCard/"+candidate, function(){
+                $('#'+candid+' #voteButton').on('click', function() {
+                    vote(this);
+                });
+            });
         });
     });
-    setTimeout(function(){setVoteButtonsClickable(postid)}, 1000);
 }
 
 function sendMail(){
