@@ -15,7 +15,7 @@ func StartSession(c *gin.Context) {
     }
     
     roll := c.PostForm("roll")
-    session.Set("UserType","Voter")
+    session.Set("UserType","Authenticated")
     session.Set("ID",roll)
     session.Save()
 }

@@ -140,6 +140,11 @@ func CheckUserLogin(c *gin.Context) {
     roll := c.PostForm("roll")
     passHash := c.PostForm("pass")
     
+    if roll == "CEO" {
+        CEOLogin(c)
+        return
+    }
+    
     voter, err := ElectionDb.FindVoter(roll)
     if err != nil {
         c.String(http.StatusForbidden, "This student has not registered.")

@@ -66,3 +66,22 @@ func RegisterCEO(c *gin.Context) {
         c.String(http.StatusAccepted, "CEO successfully registered.")
     }
 }
+
+func CEOLogin(c *gin.Context) {
+    passHash := c.PostForm("pass")
+    ceo, err := ElectionDb.GetCEO()
+    if err != nil {
+        c.String(http.StatusForbidden, "CEO has not yet registered.")
+        return
+    }
+    
+    if ceo.Password != passHash {
+        c.String(http.StatusForbidden, "Invalid Password.")
+        return
+    }
+    
+    utils.StartSession(c)
+    
+    c.JSON(http.StatusOK, &ceo)
+}
+
