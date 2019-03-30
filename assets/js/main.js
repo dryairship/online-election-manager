@@ -271,15 +271,18 @@ function encryptVotes(){
         ballotIDs[pid] = ballotID;
         encryptedBallotIDs[pid] = encryptWithPassword(ballotID);
         console.log(ballotID+" used for post of "+post["PostName"]);
-        var currentVote = votesCandidateNames[pid].join("$").concat("$").concat(ballotID);
-        if(votesCandidatePublicKeys[pid][3]!=undefined){
-            currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][3], currentVote);
-        }
-        if(votesCandidatePublicKeys[pid][2]!=undefined){
-            currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][2], currentVote);
-        }
-        if(votesCandidatePublicKeys[pid][1]!=undefined){
-            currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][1], currentVote);
+        var currentVote = "NOTA$NOTA$NOTA$".concat(ballotID);
+        if(votesCandidateNames[pid] != undefined){
+            currentVote = votesCandidateNames[pid].join("$").concat("$").concat(ballotID);
+            if(votesCandidatePublicKeys[pid][3]!=undefined){
+                currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][3], currentVote);
+            }
+            if(votesCandidatePublicKeys[pid][2]!=undefined){
+                currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][2], currentVote);
+            }
+            if(votesCandidatePublicKeys[pid][1]!=undefined){
+                currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][1], currentVote);
+            }
         }
         currentVote = sjcl.encrypt(unserializedPublicKeyOfCEO, currentVote);
         finalVotes[pid] = currentVote;
