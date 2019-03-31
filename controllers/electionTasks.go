@@ -2,6 +2,7 @@ package controllers
 
 import (
     "github.com/dryairship/online-election-manager/models"
+    "github.com/dryairship/online-election-manager/config"
     "github.com/dryairship/online-election-manager/utils"
     "github.com/gin-gonic/gin"
     "net/http"
@@ -61,3 +62,14 @@ func SubmitVote(c *gin.Context) {
     
     c.JSON(http.StatusOK, "Votes successfully submitted.")
 }
+
+func GetElectionState(c *gin.Context) {
+    _, err := utils.GetSessionID(c)
+    if err != nil {
+        c.String(http.StatusForbidden, "You need to be logged in.")
+        return
+    }
+    
+    c.String(http.StatusOK, string(48+config.ElectionState))
+}
+
