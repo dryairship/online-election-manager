@@ -2,6 +2,7 @@ var candidates;
 var totalPosts;
 var privateKeyOfCEO;
 var names = [];
+var votesStr = [];
 var usernames = [];
 var privateKeys = [];
 
@@ -10,6 +11,20 @@ function calculate(){
     $("button").unbind('click');
     $("button").on('click', showResults);
     fetchPosts();
+}
+
+function findAllResults(){
+
+}
+
+function parseVotes(votes, callback){
+    votes.forEach(function(el, ind, all){
+        if(votesStr[el.postid] == undefined){
+            votesStr[el.postid] = [];
+        }
+        votesStr[el.postid].push(el.data);
+    });
+    callback();
 }
 
 function parseCandidatesData(){
@@ -24,6 +39,17 @@ function parseCandidatesData(){
         } catch {}
         names[el.PostID].push(el.Name);
         usernames[el.PostID].push(el.Username);
+    });
+}
+
+function fetchVotes(){
+    $.ajax({
+        type: "GET",
+        url:  "ceo/fetchVotes/",
+        cache:false,
+        success: function(response){
+            parseVotes(response,findAllResults);
+        }
     });
 }
 
@@ -50,6 +76,7 @@ function fetchCandidates(){
         success: function(response){
             candidates = response;
             parseCandidatesData();
+            fetchVotes();
         }
     });
 }
