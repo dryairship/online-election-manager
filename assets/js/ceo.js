@@ -12,7 +12,7 @@ var finalUsernames = [];
 function calculate(){
     $("button").html("Display Final Tally");
     $("button").unbind('click');
-    $("button").on('click', showResults);
+    $("button").on('click', function(){parseResults(displayResults);});
     fetchPosts();
 }
 
