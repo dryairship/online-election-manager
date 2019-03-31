@@ -5,11 +5,43 @@ function calculate(){
 }
 
 function startVoting(){
-
+    var pair = generateKeyPair();
+    userData.publickey = serializePublicKey(pair.pub);
+    privateKeyOfCEO = pair.sec;
+    userData.privatekey = serializePrivateKey(pair.sec);
+    $.ajax({
+        type: "POST",
+        url:  "/ceo/startVoting",
+        data: JSON.stringify({
+            'pubkey': userData.publickey,
+            'privkey': userData.privatekey
+        }),
+        contentType: 'application/json; charset=utf-8',
+        cache:false,
+        success: function(response){
+            $("button").html("Stop Voting");
+            $("button").unbind("click");
+            $("button").on('click', stopVoting);
+        },
+        error: function(response){
+            alert(response.responseText);
+        }
+    });
 }
 
 function stopVoting(){
-
+    $.ajax({
+        type: "POST",
+        url:  "/ceo/stopVoting",
+        cache:false,
+        success: function(response){
+            $("button").html("Calculate Results");
+            $("button").on('click', calculate);
+        },
+        error: function(response){
+            alert(response.responseText);
+        }
+    });
 }
 
 function initializeCEO(){
