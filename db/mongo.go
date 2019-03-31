@@ -92,3 +92,10 @@ func (db ElectionDatabase) GetVotes() ([]models.Vote, error) {
     return votes, err
 }
 
+func (db ElectionDatabase) GetAllCandidates() ([]models.Candidate, error) {
+    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
+    var candidates []models.Candidate
+    err := candidatesCollection.Find(nil).All(&candidates)
+    return candidates, err
+}
+

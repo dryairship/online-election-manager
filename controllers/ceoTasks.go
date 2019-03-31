@@ -100,3 +100,28 @@ func FetchVotes(c *gin.Context) {
     c.JSON(http.StatusOK, &votes)
 }
 
+func FetchCandidates(c *gin.Context){
+    id, err := utils.GetSessionID(c)
+    if err != nil || id != "CEO" {
+        c.String(http.StatusForbidden, "Only the CEO can access this.")
+        return
+    }
+    
+    candidates, err := ElectionDb.GetAllCandidates()
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Error while fetching candidates")
+    }
+    
+    data := make([]CandidateData, len(candidates))
+    for i, candidate := range candidates {
+        data[i] = CandidateData {
+            Name:       candidate.Name,
+            Username:   candidate.Username,
+            PrivateKey: candidate.PrivateKey,
+            PostID:     candidate.PostID,
+        }
+    }
+    c.JSON(http.StatusOK, data)
+}
+
+
