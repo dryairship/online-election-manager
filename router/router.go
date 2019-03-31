@@ -21,8 +21,19 @@ func SetUpRoutes(r *gin.Engine) {
         election.GET("/getVotablePosts/:roll", controllers.GetVotablePosts)
         election.GET("/getCandidateInfo/:username", controllers.GetCandidateInfo)
         election.GET("/getCandidateCard/:username", controllers.GetCandidateCard)
+        election.GET("/getElectionState", controllers.GetElectionState)
         election.POST("/submitVote", controllers.SubmitVote)
+    }
+    
+    ceo := r.Group("/ceo")
+    {
+        ceo.POST("/startVoting", controllers.StartVoting)
+        ceo.POST("/stopVoting", controllers.StopVoting)
+        ceo.GET("/fetchPosts", controllers.FetchPosts)
+        ceo.GET("/fetchVotes", controllers.FetchVotes)
+        ceo.GET("/fetchCandidates", controllers.FetchCandidates)
     }
     
     r.Use(static.Serve("/",static.LocalFile(config.AssetsPath,true)))
 }
+
