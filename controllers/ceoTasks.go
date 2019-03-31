@@ -7,6 +7,18 @@ import (
     "net/http"
 )
 
+type NewCEOData struct {
+    PublicKey       string  `json:"pubkey"`
+    PrivateKey      string  `json:"privkey"`
+}
+
+type CandidateData struct {
+    Name        string
+    Username    string
+    PrivateKey  string
+    PostID      string
+}
+
 func SendMailToCEO(c *gin.Context) {
     ceo, err := ElectionDb.GetCEO()
     if err == nil {
@@ -137,5 +149,59 @@ func FetchPosts(c *gin.Context) {
         return
     }
     c.JSON(http.StatusOK, &posts)
+}
+
+func StartVoting(c *gin.Context) {
+    id, err := utils.GetSessionID(c)
+    if err != nil || id != "CEO" {
+        c.String(http.StatusForbidden, "Only the CEO can access this.")
+        return
+    }
+    
+    if config.ElectionState != config.VotingNotYetStarted {
+        c.String(http.StatusBadRequest, "You are too late. Voting has already started.")
+        return
+    }
+    
+    ceo, err := ElectionDb.GetCEO()
+    if err != nil {
+        c.String(http.StatusInternalServerError, "CEO not yet assigned.")
+        return
+    }
+    newData := NewCEOData{}
+    err = c.BindJSON(&newData)
+    if err != nil {
+        c.String(http.StatusBadRequest, "Data format not recognized.")
+        return
+    }
+    
+    ceo.PublicKey = newData.PublicKey
+    ceo.PrivateKey = newData.PrivateKey
+    err = ElectionDb.UpdateCEO(&ceo)
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Database Error.")
+        return
+    }
+    
+    config.PublicKeyOfCEO = ceo.PublicKey
+    config.ElectionState = config.AcceptingVotes
+    
+    c.String(http.StatusOK, "Voting Started.")
+}
+
+func StopVoting(c *gin.Context) {
+    id, err := utils.GetSessionID(c)
+    if err != nil || id != "CEO" {
+        c.String(http.StatusForbidden, "Only the CEO can access this.")
+        return
+    }
+    
+    if config.ElectionState != config.AcceptingVotes {
+        c.String(http.StatusBadRequest, "The system is already not accepting new votes.")
+        return
+    }
+    
+    config.ElectionState = config.VotingStopped
+    c.String(http.StatusOK, "Voting Stopped")
 }
 
