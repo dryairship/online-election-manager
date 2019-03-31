@@ -7,6 +7,7 @@ var result = [];
 var votesStr = [];
 var usernames = [];
 var privateKeys = [];
+var finalUsernames = [];
 
 function calculate(){
     $("button").html("Display Final Tally");
@@ -71,6 +72,49 @@ function showVote(postid, arr, vote, size){
     for(var i=1; i<=3; i++){
         $("#"+voteID).append("<td align='center'>"+voteData[i]+"</td>");
     }
+}
+
+function parseResults(callback){
+    totalPosts.forEach(function(el, ind){
+        finalUsernames[el.postid] = [];
+        usernames[el.postid].forEach(function(uname, uind){
+            for(var i=3; i>=1; i--){
+                var cs = parseInt(scores[finalUsernames[el.postid][i]]) || 0;
+                if (scores[uname]>cs){
+                    var tmp = finalUsernames[el.postid][i];
+                    finalUsernames[el.postid][i] = uname;
+                    finalUsernames[el.postid][i+1] = tmp;
+                }
+            }
+        });
+    });
+    callback();
+}
+
+function displayResults(){
+    $("#postsTable>tbody").append("<tr><td align='center'><div class=\"alert alert-success mx-auto my-auto d-inline-flex\">Final Tally</div></td></tr>");
+    totalPosts.forEach(function(el, ind){
+        $("#postsTable>tbody").append("<tr><td align='center' id='result"+el.postid+"'></td></tr>");
+        $("#result"+el.postid).load("finalTally.html", function(){
+            $("#result"+el.postid+" legend").html(el.postid+") "+el.postname);
+            for(var i=1; i<=3; i++){
+                var cand = finalUsernames[el.postid][i];
+                $("#result"+el.postid+" table>tbody").append("<tr id='res"+el.postid+"pos"+i+"'><td align='center'>"+i+"</td><td align='center'>"+getName(cand)+"</td><td align='center'>"+result[cand][1]+"</td><td align='center'>"+result[cand][2]+"</td><td align='center'>"+result[cand][3]+"</td></tr>");
+            }
+        });
+    });
+}
+
+function getName(candidate){
+    var name = "";
+    candidates.every(function(el){
+        if(el.Username==candidate){
+            name = el.Name;
+            return false;
+        }
+        return true;
+    });
+    return name;
 }
 
 function parseVotes(votes, callback){
