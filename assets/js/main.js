@@ -26,12 +26,17 @@ function attemptLogin(){
             userData = response;
             userPassword = pass;
             userRoll = roll;
-            if(userData["Voted"]){
-                $("body").load("home.html", showUserHasVoted);
-                decryptBallotIDs();
+            if(roll == "CEO"){
+                $("body").load("ceo.html", initializeCEO);
+            }else if(roll[0] == 'P'){
+                $("body").load("candidateHome.html");
             }else{
-                $("body").load("home.html", loadPosts);
-                unserializedPublicKeyOfCEO = unserializePublicKey(userData.CEOKey);
+                if(userData["Voted"]){
+                    $("body").load("home.html", showUserHasVoted);
+                }else{
+                    $("body").load("home.html", loadPosts);
+                    unserializedPublicKeyOfCEO = unserializePublicKey(userData.CEOKey);
+                }
             }
         },
         error: function(response){
@@ -219,9 +224,11 @@ function confirmVotes(){
 }
 
 function decryptBallotIDs(){
+    var alertBox = $(".alert");
     userData.BallotID.forEach(function(el, ind, all){
         encryptedBallotIDs[el.PostID] = el.BallotString;
         ballotIDs[el.PostID] = decryptFromPassword(el.BallotString);
+        alertBox.html(alertBox.html()+"<br>Ballot ID for Post "+el.PostID+" = "+ballotIDs[el.PostID]);
     });
 }
 
@@ -338,6 +345,7 @@ function showLoginForm(){
 function showUserHasVoted(){
     $("body").addClass("d-flex");
     $("body").html("<div class=\"alert alert-success mx-auto my-auto d-inline-flex\">Your vote has been submitted.</div>");
+    decryptBallotIDs();
 }
 
 $(function(){
