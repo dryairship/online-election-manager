@@ -109,7 +109,7 @@ func FetchCandidates(c *gin.Context){
     
     candidates, err := ElectionDb.GetAllCandidates()
     if err != nil {
-        c.String(http.StatusInternalServerError, "Error while fetching candidates")
+        c.String(http.StatusInternalServerError, "Error while fetching candidates.")
     }
     
     data := make([]CandidateData, len(candidates))
@@ -124,4 +124,18 @@ func FetchCandidates(c *gin.Context){
     c.JSON(http.StatusOK, data)
 }
 
+func FetchPosts(c *gin.Context) {
+    id, err := utils.GetSessionID(c)
+    if err != nil || id != "CEO" {
+        c.String(http.StatusForbidden, "Only the CEO can access this.")
+        return
+    }
+    
+    posts, err := ElectionDb.GetPosts()
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Error while fetching posts.")
+        return
+    }
+    c.JSON(http.StatusOK, &posts)
+}
 
