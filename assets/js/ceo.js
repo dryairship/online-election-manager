@@ -2,6 +2,8 @@ var candidates;
 var totalPosts;
 var privateKeyOfCEO;
 var names = [];
+var scores = [];
+var result = [];
 var votesStr = [];
 var usernames = [];
 var privateKeys = [];
@@ -14,7 +16,61 @@ function calculate(){
 }
 
 function findAllResults(){
+    totalPosts.forEach(function(el, ind, all){
+        $("#postsTable>tbody").append("<tr><td align='center' id='post"+el.postid+"'></td></tr>");
+        $("#post"+el.postid).load("resultsTable.html", function(){
+            $("#post"+el.postid+" legend").html(el.postid+") "+el.postname);
+            findResult(el.postid);
+        });
+    });
+}
 
+function findResult(postid){
+    votesStr[postid].forEach(function(el, ind, all){
+        var newvote = [], vote = sjcl.decrypt(privateKeyOfCEO, el);
+        var pref = 1;
+        for(i=1; vote!=null; i++){
+            newvote[i] = analyzeVote(postid, vote, i);
+            if(newvote[i]==vote){
+                showVote(postid, newvote, vote, i);
+                break;
+            }
+            vote = newvote[i];
+        }
+    });
+}
+
+function analyzeVote(postid, vote, pref){
+    var newVote = null;
+    privateKeys[postid].every(function(el, ind, all){
+        try {
+            newVote = sjcl.decrypt(el, vote);
+            if (result[usernames[postid][ind]]==undefined){
+                result[usernames[postid][ind]]=[0,0,0,0];
+            }
+            if (scores[usernames[postid][ind]]==undefined){
+                scores[usernames[postid][ind]]=0;
+            }
+            result[usernames[postid][ind]][pref] += 1;
+            scores[usernames[postid][ind]]+=Math.pow(10,(3-pref)*3);
+            return false;
+        } catch {
+            return true;
+        }
+    });
+    if (newVote==null){
+        return vote;
+    }
+    return newVote;
+}
+
+function showVote(postid, arr, vote, size){
+    var voteData = vote.split("$");
+    var voteID = voteData[size];
+    $("#post"+postid+" table>tbody").append("<tr id='"+voteID+"'><td align='center'>"+voteID+"</td></tr>");
+    for(var i=1; i<=3; i++){
+        $("#"+voteID).append("<td align='center'>"+voteData[i]+"</td>");
+    }
 }
 
 function parseVotes(votes, callback){
