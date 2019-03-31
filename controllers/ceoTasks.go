@@ -85,3 +85,18 @@ func CEOLogin(c *gin.Context) {
     c.JSON(http.StatusOK, &ceo)
 }
 
+func FetchVotes(c *gin.Context) {
+    id, err := utils.GetSessionID(c)
+    if err != nil || id != "CEO" {
+        c.String(http.StatusForbidden, "Only the CEO can access this.")
+        return
+    }
+    
+    votes, err := ElectionDb.GetVotes()
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Error while fetching votes.")
+        return
+    }
+    c.JSON(http.StatusOK, &votes)
+}
+

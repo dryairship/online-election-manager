@@ -85,3 +85,10 @@ func (db ElectionDatabase) UpdateCEO(newCEO *models.CEO) error {
     return err
 }
 
+func (db ElectionDatabase) GetVotes() ([]models.Vote, error) {
+    votesCollection := db.Session.DB(config.MongoDbName).C("votes")
+    var votes []models.Vote
+    err := votesCollection.Find(nil).All(&votes)
+    return votes, err
+}
+
