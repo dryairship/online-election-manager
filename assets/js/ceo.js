@@ -1,9 +1,26 @@
+var totalPosts;
 var privateKeyOfCEO;
 
 function calculate(){
-
+    $("button").html("Display Final Tally");
+    $("button").unbind('click');
+    $("button").on('click', showResults);
+    fetchPosts();
 }
 
+function fetchPosts(){
+    $.ajax({
+        type: "GET",
+        url:  "/ceo/fetchPosts",
+        cache:false,
+        success: function(response){
+            totalPosts = response;
+        },
+        error: function(response){
+            alert(response.responseText);
+        }
+    });
+}
 function startVoting(){
     var pair = generateKeyPair();
     userData.publickey = serializePublicKey(pair.pub);
