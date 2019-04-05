@@ -70,7 +70,10 @@ function showVote(postid, arr, vote, size){
     var voteID = voteData[size];
     $("#post"+postid+" table>tbody").append("<tr id='"+voteID+"'><td align='center'>"+voteID+"</td></tr>");
     for(var i=1; i<=3; i++){
-        $("#"+voteID).append("<td align='center'>"+voteData[i]+"</td>");
+        if(i==size || voteData[i]==undefined)
+            $("#"+voteID).append("<td align='center'>No Choice</td>");
+        else
+            $("#"+voteID).append("<td align='center'>"+voteData[i]+"</td>");
     }
 }
 

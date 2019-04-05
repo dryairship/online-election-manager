@@ -158,7 +158,7 @@ function register(){
             }),
             cache: false,
             success: function(response){
-            showLoginForm();
+                showLoginForm();
                 $("#loginError").removeClass("alert-danger");
                 $("#loginError").addClass("alert-success");
                 document.getElementById("loginError").style="display:block";
@@ -278,8 +278,9 @@ function encryptVotes(){
         ballotIDs[pid] = ballotID;
         encryptedBallotIDs[pid] = encryptWithPassword(ballotID);
         console.log(ballotID+" used for post of "+post["PostName"]);
-        var currentVote = "NOTA$NOTA$NOTA$".concat(ballotID);
-        if(votesCandidateNames[pid] != undefined){
+        if(votesCandidateNames[pid] == undefined || votesCandidateNames[pid].length==0){
+            currentVote = "$".concat(ballotID);
+        }else{
             currentVote = votesCandidateNames[pid].join("$").concat("$").concat(ballotID);
             if(votesCandidatePublicKeys[pid][3]!=undefined){
                 currentVote = sjcl.encrypt(votesCandidatePublicKeys[pid][3], currentVote);
