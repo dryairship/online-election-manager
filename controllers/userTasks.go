@@ -2,6 +2,7 @@ package controllers
 
 import (
     "github.com/dryairship/online-election-manager/models"
+    "github.com/dryairship/online-election-manager/config"
     "github.com/dryairship/online-election-manager/utils"
     "github.com/dryairship/online-election-manager/db"
     "github.com/gin-gonic/gin"
@@ -59,6 +60,11 @@ func GetVotablePosts(c *gin.Context){
 }
 
 func RegisterNewVoter(c *gin.Context){
+    if config.ElectionState == config.VotingStopped {
+        c.String(http.StatusForbidden, "Registration period is over.")
+        return
+    }
+    
     roll := c.PostForm("roll")
     passHash := c.PostForm("pass")
     authCode := c.PostForm("auth")
@@ -101,6 +107,11 @@ func RegisterNewVoter(c *gin.Context){
 }
 
 func SendMailToStudent(c *gin.Context) {
+    if config.ElectionState == config.VotingStopped {
+        c.String(http.StatusForbidden, "Registration period is over.")
+        return
+    }
+    
     roll := c.Param("roll")
     
     if roll == "CEO" {
@@ -142,6 +153,16 @@ func CheckUserLogin(c *gin.Context) {
     
     if roll == "CEO" {
         CEOLogin(c)
+        return
+    }
+    
+    if config.ElectionState == config.VotingNotYetStarted {
+        c.String(http.StatusForbidden, "Voting has not yet started.")
+        return
+    }
+    
+    if config.ElectionState == config.VotingStopped {
+        c.String(http.StatusForbidden, "Voting period is over.")
         return
     }
     

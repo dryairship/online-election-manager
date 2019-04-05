@@ -1,12 +1,19 @@
 package controllers
 
 import (
+    "github.com/dryairship/online-election-manager/utils"
     "github.com/gin-gonic/gin"
     "net/http"
     "fmt"
 )
 
 func GetCandidateInfo(c *gin.Context) {
+    _, err := utils.GetSessionID(c)
+    if err != nil {
+        c.String(http.StatusForbidden, "Unauthorized request.")
+        return
+    }
+    
     username := c.Param("username")
     
     candidate, err := ElectionDb.GetCandidate(username)
@@ -21,6 +28,12 @@ func GetCandidateInfo(c *gin.Context) {
 }
 
 func GetCandidateCard(c *gin.Context) {
+    _, err := utils.GetSessionID(c)
+    if err != nil {
+        c.String(http.StatusForbidden, "Unauthorized request.")
+        return
+    }
+    
     username := c.Param("username")
     
     card := "<div class=\"user_card my-5 mx-3\" style=\"width:230px\">"
@@ -44,3 +57,4 @@ func GetCandidateCard(c *gin.Context) {
     formattedCard := fmt.Sprintf(card, candidate.Roll, candidate.Name, candidate.Manifesto, candidate.PostID, candidate.PublicKey)
     c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(formattedCard))
 }
+
