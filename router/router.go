@@ -18,7 +18,7 @@ func SetUpRoutes(r *gin.Engine) {
     
     election := r.Group("/election")
     {
-        election.GET("/getVotablePosts/:roll", controllers.GetVotablePosts)
+        election.GET("/getVotablePosts", controllers.GetVotablePosts)
         election.GET("/getCandidateInfo/:username", controllers.GetCandidateInfo)
         election.GET("/getCandidateCard/:username", controllers.GetCandidateCard)
         election.GET("/getElectionState", controllers.GetElectionState)

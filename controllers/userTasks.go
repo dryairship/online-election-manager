@@ -47,10 +47,8 @@ func GetPostsForVoter(roll string) []models.VotablePost {
 }
 
 func GetVotablePosts(c *gin.Context){
-    roll := c.Param("roll")
-    
-    id, err := utils.GetSessionID(c)
-    if err != nil || id != roll {
+    roll, err := utils.GetSessionID(c)
+    if err != nil {
         c.String(http.StatusForbidden, "You are not authorized to use this API.")
         return
     }

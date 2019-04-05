@@ -52,7 +52,7 @@ function loadPosts(){
     console.log("Loading Posts");
     $.ajax({
         type: "GET",
-        url: "/election/getVotablePosts/"+userRoll,
+        url: "/election/getVotablePosts",
         cache: false,
         success: function(response){
             allPosts = response;
