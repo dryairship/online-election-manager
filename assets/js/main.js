@@ -33,9 +33,11 @@ function attemptLogin(){
             }else{
                 if(userData["Voted"]){
                     $("body").load("home.html", showUserHasVoted);
-                }else{
+                }else if(userData["State"]==1){
                     $("body").load("home.html", loadPosts);
                     unserializedPublicKeyOfCEO = unserializePublicKey(userData.CEOKey);
+                }else{
+                    $("body").load("home.html", showIncorrectState);
                 }
             }
         },
@@ -347,6 +349,14 @@ function showUserHasVoted(){
     $("body").addClass("d-flex");
     $("body").html("<div class=\"alert alert-success mx-auto my-auto d-inline-flex\">Your vote has been submitted.</div>");
     decryptBallotIDs();
+}
+
+function showIncorrectState(){
+    var msg;
+    if(userData["State"]==0) msg = "Voting has not yet started.";
+    else msg = "Voting period is over now."
+    $("body").addClass("d-flex");
+    $("body").html("<div class=\"alert alert-danger mx-auto my-auto d-inline-flex\">"+msg+"</div>");
 }
 
 $(function(){

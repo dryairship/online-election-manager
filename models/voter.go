@@ -33,6 +33,7 @@ type (
         BallotID    []BallotID
         Voted       bool
         CEOKey      string
+        State       int
     }
 )
 
@@ -63,5 +64,6 @@ func (voter Voter) Simplify() SimplifiedVoter {
         BallotID:   voter.BallotID,
         Voted:      voter.Voted,
         CEOKey:     config.PublicKeyOfCEO,
+        State:      config.ElectionState,
     }
 }
