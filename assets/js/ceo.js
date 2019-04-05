@@ -75,6 +75,7 @@ function showVote(postid, arr, vote, size){
 }
 
 function parseResults(callback){
+    $("button").remove();
     totalPosts.forEach(function(el, ind){
         finalUsernames[el.postid] = [];
         usernames[el.postid].forEach(function(uname, uind){
@@ -213,6 +214,7 @@ function stopVoting(){
         cache:false,
         success: function(response){
             $("button").html("Calculate Results");
+            $("button").unbind("click");
             $("button").on('click', calculate);
         },
         error: function(response){
