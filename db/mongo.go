@@ -99,3 +99,28 @@ func (db ElectionDatabase) GetAllCandidates() ([]models.Candidate, error) {
     return candidates, err
 }
 
+func (db ElectionDatabase) ResetDatabase() error {
+    _, err := db.Session.DB(config.MongoDbName).C("candidates").RemoveAll(nil)
+    if err != nil {
+        return err
+    }
+    
+    _, err = db.Session.DB(config.MongoDbName).C("voters").RemoveAll(nil)
+    if err != nil {
+        return err
+    }
+    
+    _, err = db.Session.DB(config.MongoDbName).C("votes").RemoveAll(nil)
+    if err != nil {
+        return err
+    }
+    
+    _, err = db.Session.DB(config.MongoDbName).C("posts").RemoveAll(nil)
+    if err != nil {
+        return err
+    }
+    
+    _, err = db.Session.DB(config.MongoDbName).C("ceo").RemoveAll(nil)
+    return err
+}
+
