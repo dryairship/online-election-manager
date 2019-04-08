@@ -72,6 +72,11 @@ func RegisterNewVoter(c *gin.Context){
         return
     }
     
+    if roll[0] == 'P' {
+        RegisterCandidate(c)
+        return
+    }
+    
     voter, err := ElectionDb.FindVoter(roll)
     if err != nil {
         c.String(http.StatusForbidden, "You need to get a verification<br>mail before you register.")
@@ -117,6 +122,11 @@ func SendMailToStudent(c *gin.Context) {
         return
     }
     
+    if roll[0] == 'P' {
+        SendMailToCandidate(c)
+        return
+    }
+    
     _, err := CanMailBeSentToStudent(roll)
     if err != nil {
         c.String(http.StatusBadRequest, err.Error())
@@ -151,6 +161,11 @@ func CheckUserLogin(c *gin.Context) {
     
     if roll == "CEO" {
         CEOLogin(c)
+        return
+    }
+    
+    if roll[0] == 'P' {
+        CandidateLogin(c)
         return
     }
     
