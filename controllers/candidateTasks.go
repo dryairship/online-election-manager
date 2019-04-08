@@ -8,6 +8,11 @@ import (
     "fmt"
 )
 
+type Keys struct {
+    PublicKey       string  `json:"pubkey"`
+    PrivateKey      string  `json:"privkey"`
+}
+
 func GetCandidateInfo(c *gin.Context) {
     _, err := utils.GetSessionID(c)
     if err != nil {
@@ -58,7 +63,6 @@ func GetCandidateCard(c *gin.Context) {
     formattedCard := fmt.Sprintf(card, candidate.Roll, candidate.Name, candidate.Manifesto, candidate.PostID, candidate.PublicKey)
     c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(formattedCard))
 }
-
 
 func SendMailToCandidate(c *gin.Context) {
     if config.ElectionState != config.VotingNotYetStarted {
@@ -138,7 +142,6 @@ func RegisterCandidate(c *gin.Context) {
     }
 }
 
-
 func CandidateLogin(c *gin.Context) {
     username := c.PostForm("roll")
     passHash := c.PostForm("pass")
@@ -157,5 +160,79 @@ func CandidateLogin(c *gin.Context) {
     
     simplifiedCandidate := candidate.Simplify()
     c.JSON(http.StatusOK, &simplifiedCandidate)
+}
+
+func DeclarePrivateKey(c *gin.Context){
+    username, err := utils.GetSessionID(c)
+    if err != nil {
+        c.String(http.StatusForbidden, "You need to be logged in.")
+        return
+    }
+    
+    candidate, err := ElectionDb.GetCandidate(username)
+    if err != nil {
+        c.String(http.StatusNotFound, "Candidate not found.")
+        return
+    }
+    
+    if candidate.KeyState != config.KeysGenerated {
+        c.String(http.StatusBadRequest, "Candidate has already declared private key.")
+        return
+    }
+    
+    keys := Keys{}
+    err = c.BindJSON(&keys)
+    if err != nil {
+        c.String(http.StatusBadRequest, "Data format not recognized.")
+        return
+    }
+    
+    candidate.PublicKey = keys.PublicKey
+    candidate.PrivateKey = keys.PrivateKey
+    candidate.KeyState = config.KeysDeclared
+    err = ElectionDb.UpdateCandidate(username, &candidate)
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Database Error.")
+        return
+    }
+    
+    c.JSON(http.StatusOK, "Public Key succesfully received.")
+}
+
+func ConfirmCandidature(c *gin.Context){
+    username, err := utils.GetSessionID(c)
+    if err != nil {
+        c.String(http.StatusForbidden, "You need to be logged in.")
+        return
+    }
+    
+    candidate, err := ElectionDb.GetCandidate(username)
+    if err != nil {
+        c.String(http.StatusNotFound, "Candidate not found.")
+        return
+    }
+    
+    if candidate.KeyState != config.KeysNotGenerated {
+        c.String(http.StatusBadRequest, "Candidate has already registered.")
+        return
+    }
+    
+    keys := Keys{}
+    err = c.BindJSON(&keys)
+    if err != nil {
+        c.String(http.StatusBadRequest, "Data format not recognized.")
+        return
+    }
+    
+    candidate.PublicKey = keys.PublicKey
+    candidate.PrivateKey = keys.PrivateKey
+    candidate.KeyState = config.KeysGenerated
+    err = ElectionDb.UpdateCandidate(username, &candidate)
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Database Error.")
+        return
+    }
+    
+    c.JSON(http.StatusOK, "Candidature confirmed.")
 }
 
