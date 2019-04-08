@@ -34,6 +34,12 @@ func SetUpRoutes(r *gin.Engine) {
         ceo.GET("/fetchCandidates", controllers.FetchCandidates)
     }
     
+    candidate := r.Group("/candidate")
+    {
+        candidate.POST("/confirmCandidature", controllers.ConfirmCandidature)
+        candidate.POST("/declarePrivateKey", controllers.DeclarePrivateKey)
+    }
+    
     r.Use(static.Serve("/",static.LocalFile(config.AssetsPath,true)))
 }
 
