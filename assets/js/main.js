@@ -29,7 +29,7 @@ function attemptLogin(){
             if(roll == "CEO"){
                 $("body").load("ceo.html", initializeCEO);
             }else if(roll[0] == 'P'){
-                $("body").load("candidateHome.html");
+                $("body").load("candidateHome.html", initializeCandidateHome);
             }else{
                 if(userData["Voted"]){
                     $("body").load("home.html", showUserHasVoted);
@@ -357,6 +357,84 @@ function showIncorrectState(){
     else msg = "Voting period is over now."
     $("body").addClass("d-flex");
     $("body").html("<div class=\"alert alert-danger mx-auto my-auto d-inline-flex\">"+msg+"</div>");
+}
+
+function initializeCandidateHome(){
+    var button = $("button");
+    var text = $(".welcomed");
+    if(userData.KeyState==0 && userData.State=="0" ){
+        text.html("Click on the button to confirm your candidature.");
+    }else if(userData.State=="1" || (userData.State=="0" && userData.KeyState==1)){
+        button.remove();
+        text.html("Wait for the elections to end.");
+    }else if(userData.State=="2" && userData.KeyState==1){
+        text.html("Click on the button to send your private key for decryption.");
+        button.html("Send private key");
+        button.unbind('click');
+        button.on('click', sendPrivateKey);
+    }else if(userData.KeyState==2){
+        text.html("All the best for the results.");
+        button.remove();
+    }else{
+        button.remove();
+        text.removeClass("alert-success");
+        text.addClass("alert-danger");
+        text.html("An error occured.");
+    }
+}
+
+function confirmCandidature(){
+    var pair = generateKeyPair();
+    var pubKey = serializePublicKey(pair.pub);
+    var privKey = encryptWithPassword(serializePrivateKey(pair.sec));
+    $.ajax({
+        type: "POST",
+        url: "/candidate/confirmCandidature",
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({
+            'pubkey': pubKey,
+            'privkey': privKey
+        }),
+        cache: false,
+        success: function(response){
+            console.log("Submitted");
+            showCandidatureConfirmed();
+        },
+        error: function(response){
+            console.log("ERROR : "+response.responseText);
+        }
+    });
+}
+
+function sendPrivateKey(){
+    var privKey = decryptFromPassword(userData.PrivateKey);
+    $.ajax({
+        type: "POST",
+        url: "/candidate/declarePrivateKey",
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({
+            'pubkey': userData.PublicKey,
+            'privkey': privKey
+        }),
+        cache: false,
+        success: function(response){
+            console.log("Submitted");
+            showPrivateKeySubmitted();
+        },
+        error: function(response){
+            console.log("ERROR : "+response.responseText);
+        }
+    });
+}
+
+function showPrivateKeySubmitted(){
+    $(".welcomed").html("Your key has been submitted. All the best for the results.");
+    $("button").remove();
+}
+
+function showCandidatureConfirmed(){
+    $(".welcomed").html("Your candidature has been confirmed. Wait for the elections to end.");
+    $("button").remove();
 }
 
 $(function(){
