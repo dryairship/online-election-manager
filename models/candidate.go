@@ -1,5 +1,7 @@
 package models
 
+import "github.com/dryairship/online-election-manager/config"
+
 type (
     Candidate struct {
         Roll        string  `json:"roll"`
@@ -12,21 +14,36 @@ type (
         Manifesto   string  `json:"manifesto"`
         PublicKey   string  `json:"publickey"`
         PrivateKey  string  `json:"privatekey"`
+        KeyState    int     `json:"keystate"`
     }
     
     SimplifiedCandidate struct {
-        Roll        string
+        Username    string
         Name        string
         PublicKey   string
+        PrivateKey  string
         Manifesto   string
+        State       int
+        KeyState    int
     }
 )
 
 func (candidate Candidate) Simplify() SimplifiedCandidate {
     return SimplifiedCandidate {
-        Roll:       candidate.Roll,
+        Username:   candidate.Username,
         Name:       candidate.Name,
         PublicKey:  candidate.PublicKey,
+        PrivateKey: candidate.PrivateKey,
         Manifesto:  candidate.Manifesto,
+        State:      config.ElectionState,
+        KeyState:   candidate.KeyState,
+    }
+}
+
+func (candidate Candidate) GetMailRecipient() MailRecipient {
+    return MailRecipient {
+        Name:       candidate.Name,
+        EmailID:    candidate.Email,
+        AuthCode:   candidate.AuthCode,
     }
 }
