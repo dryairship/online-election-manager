@@ -99,6 +99,12 @@ func (db ElectionDatabase) GetAllCandidates() ([]models.Candidate, error) {
     return candidates, err
 }
 
+func (db ElectionDatabase) UpdateCandidate(username string, newCandidate *models.Candidate) error {
+    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
+    err := candidatesCollection.Update(bson.M{"username":username}, &newCandidate)
+    return err
+}
+
 func (db ElectionDatabase) ResetDatabase() error {
     _, err := db.Session.DB(config.MongoDbName).C("candidates").RemoveAll(nil)
     if err != nil {
