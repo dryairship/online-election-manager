@@ -130,3 +130,15 @@ func (db ElectionDatabase) ResetDatabase() error {
     return err
 }
 
+func (db ElectionDatabase) AddNewPost(post *models.Post) error {
+    postsCollection := db.Session.DB(config.MongoDbName).C("posts")
+    err := postsCollection.Insert(&post)
+    return err
+}
+
+func (db ElectionDatabase) AddNewCandidate(candidate *models.Candidate) error {
+    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
+    err := candidatesCollection.Insert(&candidate)
+    return err
+}
+
