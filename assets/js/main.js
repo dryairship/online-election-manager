@@ -9,6 +9,7 @@ var encryptedBallotIDs = [];
 var finalVotes = [];
 var unserializedPublicKeyOfCEO;
 
+// Function to chack username and password and call the appropriate functions.
 function attemptLogin(){
     var data = $('#loginform').serializeArray();
     var roll = data[0].value;
@@ -42,14 +43,15 @@ function attemptLogin(){
             }
         },
         error: function(response){
+            // Show error message in the error box.
             document.getElementById("loginError").style="display:block";
             document.getElementById("loginError").innerHTML=response.responseText;
         }
     });
 }
 
+// Fetch votes from the server and store them.
 function loadPosts(){
-    console.log("Loading Posts");
     $.ajax({
         type: "GET",
         url: "/election/getVotablePosts",
@@ -61,6 +63,7 @@ function loadPosts(){
     });
 }
 
+// Load the candidates for a particular post on the client's device.
 function loadThisPost(post, ind, all){
     var postid = post["PostID"];
     $("#postsTable>tbody").append("<tr><td align='center' id='post"+postid+"'></td></tr>");
@@ -72,6 +75,7 @@ function loadThisPost(post, ind, all){
             $('#post'+postid+'>#candidatePanel').append("<div id='"+candid+"'></div>");
             $('#'+candid).load("election/getCandidateCard/"+candidate, function(){
                 $('#'+candid+' #voteButton').on('click', function() {
+                    // If this button is clicked, it calls the vote() function with itself as the parameter.
                     vote(this);
                 });
             });
@@ -79,6 +83,7 @@ function loadThisPost(post, ind, all){
     });
 }
 
+// Reload the candidates after preferences have been reset,
 function reloadPost(postid){
     var post;
     allPosts.forEach(function(el,ind,all){
@@ -103,6 +108,7 @@ function reloadPost(postid){
     });
 }
 
+// Calls the API to send verification mail.
 function sendMail(){
     var notif = $('#mailNotification');
     notif.html("Sending mail...");
@@ -128,6 +134,7 @@ function sendMail(){
     });
 }
 
+// Method to complete user registration.
 function register(){
     var notif = $('#regNotification');
     var data = $('#registrationform').serializeArray();
@@ -177,6 +184,7 @@ function register(){
     }
 }
 
+// Store the user's preferences in a global variable.
 function vote(button){
     var postid = button.attributes["postid"].value;
     var serpubkey = button.attributes["pubkey"].value;
@@ -184,12 +192,15 @@ function vote(button){
     var pref = button.value[0];
     var candName = button.parentNode.firstChild.textContent;
     button.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
-    console.log("Voted for Candidate "+candName+" with pubkey="+pubkey+" as pref number "+pref+" on postid="+postid);
+    
+    // To change the text in other buttons.
     document.querySelectorAll("#post"+postid+" #voteButton").forEach(function(el, ind, all){
         if(el.value[0]=="1")    el.value="2nd Preference";
         else if(el.value[0]=="2")    el.value="3rd Preference";
         else el.remove()
     });
+    
+    // Show the newly added preference in the list.
     showVoted(candName,pref, postid);
     var intID = parseInt(postid);
     var intPref = parseInt(pref);
@@ -203,13 +214,14 @@ function vote(button){
     votesCandidatePublicKeys[intID][intPref] = pubkey;
 }
 
+// To display the current preferences.
 function showVoted(candName, pref, postid){
     $("#post"+postid+" #heading").html("Preferences : <a href='#' onclick='reloadPost("+postid+"); return false;' class='badge badge-danger badge-pill'>Reset Preferences</a>");
     $("#post"+postid+" .list-group").append("<li id='pref"+pref+"' class='list-group-item'>"+pref+") "+candName+"</li>");
 }
 
+// Show final votes before submission.
 function confirmVotes(){
-    console.log("Confirming");
     $("#confirmVotes .modal-body").html("");
     allPosts.forEach(function(post, ind, all){
         var pname = post["PostName"];
@@ -225,6 +237,7 @@ function confirmVotes(){
     });
 }
 
+// Decrypt Ballot IDs that a voter can use to verify his vote.
 function decryptBallotIDs(){
     var alertBox = $(".alert");
     userData.BallotID.forEach(function(el, ind, all){
@@ -234,14 +247,17 @@ function decryptBallotIDs(){
     });
 }
 
+// Convert Public Key from JSON to Base64
 function serializePublicKey(pub){
     return sjcl.codec.base64.fromBits(pub.get().x.concat(pub.get().y));
 }
 
+// Convert Private Key from JSON to Base64
 function serializePrivateKey(priv){
     return sjcl.codec.base64.fromBits(priv.get());
 }
 
+// Convert Public Key from Base64 to JSON
 function unserializePublicKey(serPub){
     return new sjcl.ecc.elGamal.publicKey(
         sjcl.ecc.curves.c256, 
@@ -249,6 +265,7 @@ function unserializePublicKey(serPub){
     );
 }
 
+// Convert Private Key from Base64 to JSON
 function unserializePrivateKey(serPriv){
     return new sjcl.ecc.elGamal.secretKey(
         sjcl.ecc.curves.c256,
@@ -256,30 +273,34 @@ function unserializePrivateKey(serPriv){
     );
 }
 
+// Generate a public-private key pair.
 function generateKeyPair(){
     return sjcl.ecc.elGamal.generateKeys(256);
 }
 
+// Decrypt something with the user's password as the key for symmetrically encrypted objects.
 function decryptFromPassword(something){
     return sjcl.decrypt(userPassword, something);
 }
 
+// Encrypt something symmetrically with the user's password as the key.
 function encryptWithPassword(something){
     return sjcl.encrypt(userPassword, something);
 }
 
+// Call the appropriate functions to submit votes.
 function submitVotes(){
     encryptVotes();
     sendVotes();
 }
 
+// Creates BallotIDs and encrypts it using public keys of candidates and CEO.
 function encryptVotes(){
     allPosts.forEach(function(post, ind, all){
         var ballotID = getRandomString();
         var pid = parseInt(post["PostID"]);
         ballotIDs[pid] = ballotID;
         encryptedBallotIDs[pid] = encryptWithPassword(ballotID);
-        console.log(ballotID+" used for post of "+post["PostName"]);
         if(votesCandidateNames[pid] == undefined || votesCandidateNames[pid].length==0){
             currentVote = "$".concat(ballotID);
         }else{
@@ -299,6 +320,7 @@ function encryptVotes(){
     });
 }
 
+// Submit votes to the server.
 function sendVotes(){
     var voteData = [];
     allPosts.forEach(function(post, ind, all){
@@ -316,41 +338,38 @@ function sendVotes(){
         data: JSON.stringify(voteData),
         cache: false,
         success: function(response){
-            console.log("Submitted");
             showUserHasVoted();
-        },
-        error: function(response){
-            console.log("ERROR : "+response.responseText);
         }
     });
 }
 
+// Creates a random string.
 function getRandomString(){
     var randBytes = sjcl.random.randomWords(8);
     var randHex = sjcl.codec.hex.fromBits(randBytes);
     return randHex;
 }
 
-function init(){
-    console.log("Initializing.");
-}
-
+// Toggle from login page to registration page.
 function showRegistrationForm(){
     document.getElementById("loginContainer").style="display:none";
     document.getElementById("registrationContainer").style="display:block";
 }
 
+// Toggle from registration page to login page.
 function showLoginForm(){
     document.getElementById("loginContainer").style="display:block";
     document.getElementById("registrationContainer").style="display:none";
 }
 
+// Show that the user has submitted his vote.
 function showUserHasVoted(){
     $("body").addClass("d-flex");
     $("body").html("<div class=\"alert alert-success mx-auto my-auto d-inline-flex\">Your vote has been submitted.</div>");
     decryptBallotIDs();
 }
 
+// Show that the time for voting has ended/not started.
 function showIncorrectState(){
     var msg;
     if(userData["State"]==0) msg = "Voting has not yet started.";
@@ -359,6 +378,7 @@ function showIncorrectState(){
     $("body").html("<div class=\"alert alert-danger mx-auto my-auto d-inline-flex\">"+msg+"</div>");
 }
 
+// Set up home page when a candidate logs in.
 function initializeCandidateHome(){
     var button = $("button");
     var text = $(".welcomed");
@@ -383,6 +403,7 @@ function initializeCandidateHome(){
     }
 }
 
+// Generates a public-private key pair for a candidate and submits it.
 function confirmCandidature(){
     var pair = generateKeyPair();
     var pubKey = serializePublicKey(pair.pub);
@@ -396,16 +417,13 @@ function confirmCandidature(){
             'privkey': privKey
         }),
         cache: false,
-        success: function(response){
-            console.log("Submitted");
+        success: function(response)
             showCandidatureConfirmed();
-        },
-        error: function(response){
-            console.log("ERROR : "+response.responseText);
         }
     });
 }
 
+// Sends the unencrypted private key to the server.
 function sendPrivateKey(){
     var privKey = decryptFromPassword(userData.PrivateKey);
     $.ajax({
@@ -418,25 +436,24 @@ function sendPrivateKey(){
         }),
         cache: false,
         success: function(response){
-            console.log("Submitted");
             showPrivateKeySubmitted();
-        },
-        error: function(response){
-            console.log("ERROR : "+response.responseText);
         }
     });
 }
 
+// Show the message that the private key has been submitted.
 function showPrivateKeySubmitted(){
     $(".welcomed").html("Your key has been submitted. All the best for the results.");
     $("button").remove();
 }
 
+// Show the message that the candidature has been confirmed.
 function showCandidatureConfirmed(){
     $(".welcomed").html("Your candidature has been confirmed. Wait for the elections to end.");
     $("button").remove();
 }
 
+// Load login page and seed the random bytes generator in SJCL.
 $(function(){
     $("body").load("login.html");
     var arr = new Uint32Array(128);

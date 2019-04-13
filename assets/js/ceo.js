@@ -9,6 +9,7 @@ var usernames = [];
 var privateKeys = [];
 var finalUsernames = [];
 
+// Calculate the results.
 function calculate(){
     $("button").html("Display Final Tally");
     $("button").unbind('click');
@@ -16,6 +17,7 @@ function calculate(){
     fetchPosts();
 }
 
+// Call the findResult function for all posts and append the data to the page.
 function findAllResults(){
     totalPosts.forEach(function(el, ind, all){
         $("#postsTable>tbody").append("<tr><td align='center' id='post"+el.postid+"'></td></tr>");
@@ -26,6 +28,7 @@ function findAllResults(){
     });
 }
 
+// Decrypts votes for a particular post.
 function findResult(postid){
     votesStr[postid].forEach(function(el, ind, all){
         var newvote = [], vote = sjcl.decrypt(privateKeyOfCEO, el);
@@ -41,6 +44,7 @@ function findResult(postid){
     });
 }
 
+// Decrypts a particular vote.
 function analyzeVote(postid, vote, pref){
     var newVote = null;
     privateKeys[postid].every(function(el, ind, all){
@@ -65,6 +69,7 @@ function analyzeVote(postid, vote, pref){
     return newVote;
 }
 
+// Displays the details of the vote on the page.
 function showVote(postid, arr, vote, size){
     var voteData = vote.split("$");
     var voteID = voteData[size];
@@ -77,6 +82,7 @@ function showVote(postid, arr, vote, size){
     }
 }
 
+// Find out winners and runners up from the decrypted votes.
 function parseResults(callback){
     $("button").remove();
     totalPosts.forEach(function(el, ind){
@@ -95,6 +101,7 @@ function parseResults(callback){
     callback();
 }
 
+// Display winners and runners up.
 function displayResults(){
     $("#postsTable>tbody").append("<tr><td align='center'><div class=\"alert alert-success mx-auto my-auto d-inline-flex\">Final Tally</div></td></tr>");
     totalPosts.forEach(function(el, ind){
@@ -109,6 +116,7 @@ function displayResults(){
     });
 }
 
+// Get Name of a candidate.
 function getName(candidate){
     var name = "";
     candidates.every(function(el){
@@ -121,6 +129,7 @@ function getName(candidate){
     return name;
 }
 
+// Properly store fetched votes from the server into a suitable format in the global variables.
 function parseVotes(votes, callback){
     votes.forEach(function(el, ind, all){
         if(votesStr[el.postid] == undefined){
@@ -131,6 +140,7 @@ function parseVotes(votes, callback){
     callback();
 }
 
+// Extract candidates' names, usernames, keys from the fetched data.
 function parseCandidatesData(){
     candidates.forEach(function(el, ind, all){
         if(privateKeys[el.PostID]==undefined){
@@ -146,6 +156,7 @@ function parseCandidatesData(){
     });
 }
 
+// Fetch votes from the server.
 function fetchVotes(){
     $.ajax({
         type: "GET",
@@ -157,6 +168,7 @@ function fetchVotes(){
     });
 }
 
+// Fetch posts from the server.
 function fetchPosts(){
     $.ajax({
         type: "GET",
@@ -172,6 +184,7 @@ function fetchPosts(){
     });
 }
 
+// Fetch candidates from the server.
 function fetchCandidates(){
     $.ajax({
         type: "GET",
@@ -185,6 +198,7 @@ function fetchCandidates(){
     });
 }
 
+// Create a public-private key pair for the CEO and start the voting process.
 function startVoting(){
     var pair = generateKeyPair();
     userData.publickey = serializePublicKey(pair.pub);
@@ -210,6 +224,7 @@ function startVoting(){
     });
 }
 
+// Tell the server to stop accepting votes.
 function stopVoting(){
     $.ajax({
         type: "POST",
@@ -226,6 +241,7 @@ function stopVoting(){
     });
 }
 
+// Set up CEO's homepage.
 function initializeCEO(){
     $.ajax({
         type: "GET",
