@@ -7,6 +7,8 @@ import (
     "github.com/gin-gonic/gin"
 )
 
+// Groups various API calls and routes them to the 
+// respective controller functions.
 func SetUpRoutes(r *gin.Engine) {
     
     users := r.Group("/users")
@@ -19,7 +21,6 @@ func SetUpRoutes(r *gin.Engine) {
     election := r.Group("/election")
     {
         election.GET("/getVotablePosts", controllers.GetVotablePosts)
-        election.GET("/getCandidateInfo/:username", controllers.GetCandidateInfo)
         election.GET("/getCandidateCard/:username", controllers.GetCandidateCard)
         election.GET("/getElectionState", controllers.GetElectionState)
         election.POST("/submitVote", controllers.SubmitVote)
@@ -40,6 +41,7 @@ func SetUpRoutes(r *gin.Engine) {
         candidate.POST("/declarePrivateKey", controllers.DeclarePrivateKey)
     }
     
+    // To directly serve static files in the AssetsPath directory.
     r.Use(static.Serve("/",static.LocalFile(config.AssetsPath,true)))
 }
 
