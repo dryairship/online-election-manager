@@ -6,6 +6,8 @@ import (
     "errors"
 )
 
+// This function stores the identification of the logged in user
+// in the encrypted cookie-based session storage.
 func StartSession(c *gin.Context) {
     session := sessions.Default(c)
     
@@ -20,12 +22,15 @@ func StartSession(c *gin.Context) {
     session.Save()
 }
 
+// This function deletes the data store about the user from
+// the session storage.
 func EndSession(c *gin.Context) {
     session := sessions.Default(c)
     session.Clear()
     session.Save()
 }
 
+// This function returns the identification of the logged in user.
 func GetSessionID(c *gin.Context) (string, error) {
     id := sessions.Default(c).Get("ID")
     if id != nil {
