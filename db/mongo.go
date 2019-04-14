@@ -2,15 +2,15 @@ package db
 
 import (
     "github.com/dryairship/online-election-manager/config"
-    "github.com/dryairship/online-election-manager/models"
     "gopkg.in/mgo.v2"
-    "gopkg.in/mgo.v2/bson"
 )
 
+// Struct that is used to store the session of the database connection.
 type ElectionDatabase struct {
     Session *mgo.Session
 }
 
+// Function to establish database connection.
 func ConnectToDatabase() (ElectionDatabase, error) {
     sess, err := mgo.Dial(config.MongoDialURL)
     if err != nil {
@@ -20,91 +20,7 @@ func ConnectToDatabase() (ElectionDatabase, error) {
     return ElectionDatabase{sess}, err
 }
 
-func (db ElectionDatabase) FindStudentSkeleton(roll string) (models.StudentSkeleton, error) {
-    studentsCollection := db.Session.DB(config.MongoDbName).C("students")
-    skeleton := models.StudentSkeleton{}
-    err := studentsCollection.Find(bson.M{"roll":roll}).One(&skeleton)
-    return skeleton, err
-}
-
-func (db ElectionDatabase) FindVoter(roll string) (models.Voter, error) {
-    votersCollection := db.Session.DB(config.MongoDbName).C("voters")
-    voter := models.Voter{}
-    err := votersCollection.Find(bson.M{"roll":roll}).One(&voter)
-    return voter, err
-}
-
-func (db ElectionDatabase) AddNewVoter(voter *models.Voter) error {
-    votersCollection := db.Session.DB(config.MongoDbName).C("voters")
-    err := votersCollection.Insert(&voter)
-    return err
-}
-
-func (db ElectionDatabase) UpdateVoter(roll string, newVoter *models.Voter) error {
-    votersCollection := db.Session.DB(config.MongoDbName).C("voters")
-    err := votersCollection.Update(bson.M{"roll":roll},&newVoter)
-    return err
-}
-
-func (db ElectionDatabase) GetPosts() ([]models.Post, error){
-    postsCollection := db.Session.DB(config.MongoDbName).C("posts")
-    posts := []models.Post{}
-    err := postsCollection.Find(nil).All(&posts)
-    return posts, err
-}
-
-func (db ElectionDatabase) GetCandidate(username string) (models.Candidate, error) {
-    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
-    candidate := models.Candidate{}
-    err := candidatesCollection.Find(bson.M{"username":username}).One(&candidate)
-    return candidate, err
-}
-
-func (db ElectionDatabase) InsertVote(vote *models.Vote) error {
-    votesCollection := db.Session.DB(config.MongoDbName).C("votes")
-    err := votesCollection.Insert(&vote)
-    return err
-}
-
-func (db ElectionDatabase) GetCEO() (models.CEO, error) {
-    ceoCollection := db.Session.DB(config.MongoDbName).C("ceo")
-    ceo := models.CEO{}
-    err := ceoCollection.Find(nil).One(&ceo)
-    return ceo, err
-}
-
-func (db ElectionDatabase) InsertCEO(ceo *models.CEO) error {
-    ceoCollection := db.Session.DB(config.MongoDbName).C("ceo")
-    err := ceoCollection.Insert(&ceo)
-    return err
-}
-
-func (db ElectionDatabase) UpdateCEO(newCEO *models.CEO) error {
-    ceoCollection := db.Session.DB(config.MongoDbName).C("ceo")
-    err := ceoCollection.Update(bson.M{"username":"CEO"}, &newCEO)
-    return err
-}
-
-func (db ElectionDatabase) GetVotes() ([]models.Vote, error) {
-    votesCollection := db.Session.DB(config.MongoDbName).C("votes")
-    var votes []models.Vote
-    err := votesCollection.Find(nil).All(&votes)
-    return votes, err
-}
-
-func (db ElectionDatabase) GetAllCandidates() ([]models.Candidate, error) {
-    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
-    var candidates []models.Candidate
-    err := candidatesCollection.Find(nil).All(&candidates)
-    return candidates, err
-}
-
-func (db ElectionDatabase) UpdateCandidate(username string, newCandidate *models.Candidate) error {
-    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
-    err := candidatesCollection.Update(bson.M{"username":username}, &newCandidate)
-    return err
-}
-
+// Function to delete all entries from the database.
 func (db ElectionDatabase) ResetDatabase() error {
     _, err := db.Session.DB(config.MongoDbName).C("candidates").RemoveAll(nil)
     if err != nil {
@@ -127,18 +43,6 @@ func (db ElectionDatabase) ResetDatabase() error {
     }
     
     _, err = db.Session.DB(config.MongoDbName).C("ceo").RemoveAll(nil)
-    return err
-}
-
-func (db ElectionDatabase) AddNewPost(post *models.Post) error {
-    postsCollection := db.Session.DB(config.MongoDbName).C("posts")
-    err := postsCollection.Insert(&post)
-    return err
-}
-
-func (db ElectionDatabase) AddNewCandidate(candidate *models.Candidate) error {
-    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
-    err := candidatesCollection.Insert(&candidate)
     return err
 }
 
