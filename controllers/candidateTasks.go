@@ -8,11 +8,13 @@ import (
     "fmt"
 )
 
+// Struct to accept new keys from the client.
 type Keys struct {
     PublicKey       string  `json:"pubkey"`
     PrivateKey      string  `json:"privkey"`
 }
 
+// API handler to get information about a candidate.
 func GetCandidateInfo(c *gin.Context) {
     _, err := utils.GetSessionID(c)
     if err != nil {
@@ -33,6 +35,8 @@ func GetCandidateInfo(c *gin.Context) {
     c.JSON(http.StatusOK, simplifiedCandidate)
 }
 
+// API handler to get the HTML card of a candidate.
+// *Hacky solution* to already load the data into the HTML template.
 func GetCandidateCard(c *gin.Context) {
     _, err := utils.GetSessionID(c)
     if err != nil {
@@ -64,6 +68,7 @@ func GetCandidateCard(c *gin.Context) {
     c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(formattedCard))
 }
 
+// API handler to send verification mail to a candidate.
 func SendMailToCandidate(c *gin.Context) {
     if config.ElectionState != config.VotingNotYetStarted {
         c.String(http.StatusForbidden, "Registration period for<br>candidates is over.")
@@ -101,6 +106,7 @@ func SendMailToCandidate(c *gin.Context) {
     c.String(http.StatusAccepted, "Verification Mail successfully sent<br>to "+candidate.Email)
 }
 
+// API handler to register a new candidate.
 func RegisterCandidate(c *gin.Context) {
     username := c.PostForm("roll")
     passHash := c.PostForm("pass")
@@ -142,6 +148,7 @@ func RegisterCandidate(c *gin.Context) {
     }
 }
 
+// API handler to check candidate's login credentials.
 func CandidateLogin(c *gin.Context) {
     username := c.PostForm("roll")
     passHash := c.PostForm("pass")
@@ -162,6 +169,7 @@ func CandidateLogin(c *gin.Context) {
     c.JSON(http.StatusOK, &simplifiedCandidate)
 }
 
+// API handler to accept the unencrypted private key of a candidate.
 func DeclarePrivateKey(c *gin.Context){
     username, err := utils.GetSessionID(c)
     if err != nil {
@@ -199,6 +207,7 @@ func DeclarePrivateKey(c *gin.Context){
     c.JSON(http.StatusOK, "Public Key succesfully received.")
 }
 
+// API handler to confirm candidature by updating the public and private keys of a candidate.
 func ConfirmCandidature(c *gin.Context){
     username, err := utils.GetSessionID(c)
     if err != nil {

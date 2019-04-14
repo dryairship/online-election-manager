@@ -21,6 +21,7 @@ func (err *UserError) Error() string {
     return err.reason
 }
 
+// Function to check if a verification mail can be sent to the student.
 func CanMailBeSentToStudent(roll string) (bool, error) {
     voter, err := ElectionDb.FindVoter(roll)
     if err != nil {
@@ -34,6 +35,8 @@ func CanMailBeSentToStudent(roll string) (bool, error) {
     }
 }
 
+// Function to match voter's roll number with the regular expression for a post
+// to determine whether or not the voter is eligible to vote for a post.
 func GetPostsForVoter(roll string) []models.VotablePost {
     votablePosts := []models.VotablePost{}
     for _, post := range Posts {
@@ -46,6 +49,7 @@ func GetPostsForVoter(roll string) []models.VotablePost {
     return votablePosts
 }
 
+// API handler to fetch all posts for which this voter is eligible to vote.
 func GetVotablePosts(c *gin.Context){
     roll, err := utils.GetSessionID(c)
     if err != nil {
@@ -57,6 +61,8 @@ func GetVotablePosts(c *gin.Context){
     c.JSON(http.StatusOK, votablePosts)
 }
 
+
+// API handler to register a new voter.
 func RegisterNewVoter(c *gin.Context){
     if config.ElectionState == config.VotingStopped {
         c.String(http.StatusForbidden, "Registration period is over.")
@@ -109,6 +115,7 @@ func RegisterNewVoter(c *gin.Context){
     }
 }
 
+// API handler to send a verification mail to the student.s
 func SendMailToStudent(c *gin.Context) {
     if config.ElectionState == config.VotingStopped {
         c.String(http.StatusForbidden, "Registration period is over.")
@@ -155,6 +162,7 @@ func SendMailToStudent(c *gin.Context) {
     c.String(http.StatusAccepted, "Verification Mail successfully sent<br>to "+voter.Email)
 }
 
+// API handler to check the user's login credentials.
 func CheckUserLogin(c *gin.Context) {
     roll := c.PostForm("roll")
     passHash := c.PostForm("pass")

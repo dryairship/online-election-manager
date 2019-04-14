@@ -9,6 +9,7 @@ import (
     "time"
 )
 
+// API handler to store the submitted vote.
 func SubmitVote(c *gin.Context) {
     roll, err := utils.GetSessionID(c)
     if err != nil {
@@ -38,6 +39,8 @@ func SubmitVote(c *gin.Context) {
     for i, receivedVote := range receivedVotes {
         ballotID[i] = receivedVote.GetBallotID()
         vote := receivedVote.GetVote()
+        
+        // Insert the vote after a random time delay.
         go func() {
             time.Sleep(utils.GetRandomTimeDelay())
             ElectionDb.InsertVote(&vote)
@@ -63,6 +66,7 @@ func SubmitVote(c *gin.Context) {
     c.JSON(http.StatusOK, "Votes successfully submitted.")
 }
 
+// API handler to fetch the current election state.
 func GetElectionState(c *gin.Context) {
     _, err := utils.GetSessionID(c)
     if err != nil {

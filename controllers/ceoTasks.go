@@ -7,11 +7,13 @@ import (
     "net/http"
 )
 
+// Struct to accept the keys from the client.
 type NewCEOData struct {
     PublicKey       string  `json:"pubkey"`
     PrivateKey      string  `json:"privkey"`
 }
 
+// Struct to return candidates' data to the CEO.
 type CandidateData struct {
     Name        string
     Username    string
@@ -19,6 +21,7 @@ type CandidateData struct {
     PostID      string
 }
 
+// API handler to send verification mail to CEO.
 func SendMailToCEO(c *gin.Context) {
     ceo, err := ElectionDb.GetCEO()
     if err == nil {
@@ -48,6 +51,7 @@ func SendMailToCEO(c *gin.Context) {
     c.String(http.StatusAccepted, "Verification Mail successfully sent<br>to "+ceo.Email)
 }
 
+// API handler to register CEO's account.
 func RegisterCEO(c *gin.Context) {
     passHash := c.PostForm("pass")
     authCode := c.PostForm("auth")
@@ -79,6 +83,7 @@ func RegisterCEO(c *gin.Context) {
     }
 }
 
+// API handler to check CEO's login credentials.
 func CEOLogin(c *gin.Context) {
     passHash := c.PostForm("pass")
     ceo, err := ElectionDb.GetCEO()
@@ -97,6 +102,7 @@ func CEOLogin(c *gin.Context) {
     c.JSON(http.StatusOK, &ceo)
 }
 
+// API handler to fetch all votes from the database.
 func FetchVotes(c *gin.Context) {
     id, err := utils.GetSessionID(c)
     if err != nil || id != "CEO" {
@@ -112,6 +118,7 @@ func FetchVotes(c *gin.Context) {
     c.JSON(http.StatusOK, &votes)
 }
 
+// API handler to fetch all candidates from the database.
 func FetchCandidates(c *gin.Context){
     id, err := utils.GetSessionID(c)
     if err != nil || id != "CEO" {
@@ -136,6 +143,7 @@ func FetchCandidates(c *gin.Context){
     c.JSON(http.StatusOK, data)
 }
 
+// API handler to fetch all posts from the database.
 func FetchPosts(c *gin.Context) {
     id, err := utils.GetSessionID(c)
     if err != nil || id != "CEO" {
@@ -151,6 +159,7 @@ func FetchPosts(c *gin.Context) {
     c.JSON(http.StatusOK, &posts)
 }
 
+// API handler to start voting process by accepting CEO's public and private keys.
 func StartVoting(c *gin.Context) {
     id, err := utils.GetSessionID(c)
     if err != nil || id != "CEO" {
@@ -189,6 +198,7 @@ func StartVoting(c *gin.Context) {
     c.String(http.StatusOK, "Voting Started.")
 }
 
+// API handler to stop voting process.
 func StopVoting(c *gin.Context) {
     id, err := utils.GetSessionID(c)
     if err != nil || id != "CEO" {
