@@ -3,6 +3,7 @@ package models
 import "github.com/dryairship/online-election-manager/config"
 
 type (
+    // Basic structure of a candidate that is stored in the database.
     Candidate struct {
         Roll        string  `json:"roll"`
         Name        string  `json:"name"`
@@ -17,6 +18,7 @@ type (
         KeyState    int     `json:"keystate"`
     }
     
+    // The object description that is returned through API calls.
     SimplifiedCandidate struct {
         Username    string
         Name        string
@@ -28,6 +30,7 @@ type (
     }
 )
 
+// Function to return a simplified version of the data of a candidate.
 func (candidate Candidate) Simplify() SimplifiedCandidate {
     return SimplifiedCandidate {
         Username:   candidate.Username,
@@ -40,6 +43,7 @@ func (candidate Candidate) Simplify() SimplifiedCandidate {
     }
 }
 
+// Function to return the mail recipient created from the candidate.
 func (candidate Candidate) GetMailRecipient() MailRecipient {
     return MailRecipient {
         Name:       candidate.Name,

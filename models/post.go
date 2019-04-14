@@ -1,6 +1,7 @@
 package models
 
 type (
+    // Basic structure of the posts as stored in the database.
     Post struct {
         PostID          string      `json:"postid"`
         PostName        string      `json:"postname"`
@@ -8,6 +9,7 @@ type (
         Candidates      []string    `json:"candidates"`
     }
     
+    // Structure of posts returned by the appropriate API call.
     VotablePost struct {
         PostID          string
         PostName        string
@@ -15,6 +17,7 @@ type (
     }
 )
 
+// Function to strip out regex from the data of the post.
 func (post Post) ConvertToVotablePost() VotablePost {
     return VotablePost {
         PostID:         post.PostID,

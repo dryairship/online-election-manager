@@ -3,6 +3,7 @@ package models
 import "github.com/dryairship/online-election-manager/config"
 
 type (
+    // Basic structure of the CEO as stored in the database.
     CEO struct {
         Roll        string  `json:"roll"`
         Name        string  `json:"name"`
@@ -15,6 +16,7 @@ type (
     }
 )
 
+// Function to create the CEO from its roll number.
 func (skeleton StudentSkeleton) CreateCEO(authcode string) CEO {
     return CEO {
         Roll:       skeleton.Roll,
@@ -28,6 +30,7 @@ func (skeleton StudentSkeleton) CreateCEO(authcode string) CEO {
     }
 }
 
+// Function to return the Mail Recipient created from the CEO.
 func (ceo CEO) GetMailRecipient() MailRecipient {
     return MailRecipient {
         Name:       ceo.Name,

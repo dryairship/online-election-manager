@@ -5,6 +5,7 @@ import (
 )
 
 type (
+    // Basic structure of a voter as stored in the database.
     Voter struct {
         Roll        string      `json:"roll"`
         Name        string      `json:"name"`
@@ -14,19 +15,22 @@ type (
         BallotID    []BallotID  `json:"ballotid"`
         Voted       bool        `json:"voted"`
     }
-
+    
+    // Struct to represent all the data required to send mail to a user.
     MailRecipient struct {
         Name        string
         EmailID     string
         AuthCode    string
     }
     
+    // Basic structure of a student already present in the database.
     StudentSkeleton struct {
         Roll        string  `json:"roll"`
         Email       string  `json:"email"`
         Name        string  `json:"name"`
     }
     
+    // Voter model modified to return back to the user.
     SimplifiedVoter struct {
         Roll        string
         Name        string
@@ -37,6 +41,7 @@ type (
     }
 )
 
+// Function to generate a mail recipient from a voter,
 func (voter Voter) GetMailRecipient() MailRecipient {
     return MailRecipient{
         Name:       voter.Name,
@@ -45,6 +50,7 @@ func (voter Voter) GetMailRecipient() MailRecipient {
     }
 }
 
+// Function to create a voter from the basic data of a student.
 func (skeleton StudentSkeleton) CreateVoter(authcode string) Voter {
     return Voter{
         Roll:       skeleton.Roll,
@@ -57,6 +63,7 @@ func (skeleton StudentSkeleton) CreateVoter(authcode string) Voter {
     }
 }
 
+// Function to convert a voter object to a form returnable to the user.
 func (voter Voter) Simplify() SimplifiedVoter {
     return SimplifiedVoter {
         Roll:       voter.Roll,
