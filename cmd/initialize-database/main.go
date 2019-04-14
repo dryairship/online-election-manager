@@ -11,24 +11,32 @@ import (
 )
 
 func main() {
+    // Initialize the configuration from environment variables.
+    config.InitializeConfiguration()
+    
+    // Connect to the database.
     electionDb, err := db.ConnectToDatabase()
     if err != nil {
         fmt.Println("[ERROR] Could not establish database connection.")
         os.Exit(1)
     }
     
+    // Delete all entries from the database.
     electionDb.ResetDatabase()
     
+    // Open the CSV file for reading the data about posts and candidates.
     file, err := ioutil.ReadFile(config.ElectionDataFilePath)
     if err != nil {
         fmt.Println("[ERROR] Election Data file not found.")
         os.Exit(1)
     }
     
+    // Convert data into a simpler format.
     allData := strings.TrimSpace(string(file))
     posts := strings.Split(allData, "\n")
     
     for i, post := range posts {
+        // Extract data about a post from the data read from the file.
         postID                  := fmt.Sprintf("%d", i+1)
         postData                := strings.Split(post, ",")
         postName                := postData[0]
@@ -54,6 +62,8 @@ func main() {
             }
             
             candidatesUsernames[j] = candidate.Username
+            
+            // Insert the newly created candidate into the database.
             err = electionDb.AddNewCandidate(&candidate)
             if err != nil {
                 fmt.Printf("[ERROR] Cannot add candidate %s\n", cand)
@@ -69,7 +79,9 @@ func main() {
             Candidates: candidatesUsernames,
         }
         
+        // Insert the newly created post into the database.
         err = electionDb.AddNewPost(&fullPost)
+        
         if err != nil {
             fmt.Printf("[ERROR] Cannot insert post %s\n", postName)
             electionDb.ResetDatabase()
@@ -80,6 +92,8 @@ func main() {
     }
 }
 
+
+// Function to create a candidate from the data in the file.
 func CreateCandidate(dB *db.ElectionDatabase, pID, roll, manifesto string) (models.Candidate, error) {
     skeleton, err := dB.FindStudentSkeleton(roll)
     if err != nil {
