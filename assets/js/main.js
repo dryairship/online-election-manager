@@ -417,7 +417,7 @@ function confirmCandidature(){
             'privkey': privKey
         }),
         cache: false,
-        success: function(response)
+        success: function(response){
             showCandidatureConfirmed();
         }
     });
