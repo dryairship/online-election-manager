@@ -81,3 +81,9 @@ Follow these instructions to host an election using this application :
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/dryairship/online-election-manager/blob/master/LICENSE) file for details
 
+<<<<<<< HEAD
+=======
+This project aims to provide students the comfort of voting on their own devices, without the hassle of standing in a queue at the polling booth. Students register on the portal by providing their roll numbers. This sends an authentication code to their official IITK email addresses, which they use to choose a password. They then vote for their candidates and the votes are encrypted asymmetrically using the public keys of the candidates, and sent to the server. The votes are decrypted at the time of declaration of results using the private keys of the candidates.
+
+[Here is the link](https://docs.google.com/presentation/d/1NUxbyJOmdoJwWQZVxAnTU4Inca59MdIHwtp_aervsp0) to the Google Slides Presentation.
+>>>>>>> f3c63b1cc0993dfab065c014551c3244b33071bb
