@@ -26,21 +26,21 @@ go install ./...
 ```
 This creates two executables in `$GOPATH/bin` :
 - `online-election-manager`
-- `initialize-databse`
+- `initialize-database`
 
 Also, copy the `sjcl.js` file into `assets/js/`. 
 ## Configuration
 You need to create a System Admin and populate the database with details of the students. You also need to create a configuration file which will export important values to the environment variables.
 ### Initializing the database
-- Start MongoDB.
+- Start MongoDB.  
 `mongod`
-- Connect to the database in a new terminal.
+- Connect to the database in a new terminal.  
 `mongo`
-- Create a new Election Database.
+- Create a new Election Database.  
 `> use ElectionDb`
-- Create a system admin for this database.
+- Create a system admin for this database.  
 `> db.createUser({user: "ElectionAdmin", pwd: "password", roles: ["readWrite", "dbAdmin"]})`
-- Create a new collection called `students`
+- Create a new collection called `students`.  
 `> db.createCollection("students")`
 - Fill this collection with the list of students eligible to vote. Each student is a separate document with three fields (all are strings) :
 	- `roll` - Roll number of the student.
@@ -63,15 +63,15 @@ All these values occur alternately on the same row. Thus, the format for each ro
 ```
 ## Deployment
 Follow these instructions to host an election using this application :
-- Start MongoDB in auth mode.
+- Start MongoDB in auth mode.  
 `mongod --auth`
-- Open a new terminal and load values from the configuration file into the environment variables.
+- Open a new terminal and load values from the configuration file into the environment variables.  
 `source /path/to/configuration/file/configuration.sh`
-- Change to the directory where the application's executables were installed.
+- Change to the directory where the application's executables were installed.  
 `cd $GOPATH/bin`
-- Initialize the database with the details of the posts and the candidates.
+- Initialize the database with the details of the posts and the candidates.  
 `./initialize-database`
-- Start the application.
+- Start the application.  
 `./online-election-manager`
 
 ## Authors
