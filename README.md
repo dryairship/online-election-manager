@@ -1,7 +1,7 @@
 
 # Online Election Manager
 
-A cryptographically secure portal to manage online elections, created as a part of the Project Track for the course ESC101A. The algorithm is explained in the the [report](https://github.com/dryairship/online-election-manager/blob/master/report/report.pdf). The presentation slides are available [here](https://docs.google.com/presentation/d/1NUxbyJOmdoJwWQZVxAnTU4Inca59MdIHwtp_aervsp0).
+A cryptographically secure portal to manage online elections, created as a part of the Project Track for the course ESC101A. The algorithm is explained in the [report](https://github.com/dryairship/online-election-manager/blob/master/report/report.pdf). The presentation slides are available [here](https://docs.google.com/presentation/d/1NUxbyJOmdoJwWQZVxAnTU4Inca59MdIHwtp_aervsp0).
 
 ## Getting Started
 Follow these instructions to get a copy of the application on your computer :
@@ -56,7 +56,7 @@ Follow the template given in `configurationTemplates/configuration.sh` and repla
 - The second value is the regular expression that the students' roll number must match with, to check if they are eligible to vote for this post.
 - The remaining values in each row are the details of the candidates. You need to fill two values for each candidate : 
 	- The first value is the roll number of the candidate.
-	- The second value is the link to the manifesto of the candidate.
+	- The second value is the link to the manifesto of the candidate.  
 All these values occur alternately on the same row. Thus, the format for each row is:
 ```
 <Name Of The Post>,<Regular expression for voters>,<Roll no. of candidate 1>,<Manifesto of candidate 1>,<Roll no. of candidate 2>,<Manifesto of candidate 2>,<Roll no. of candidate 3>,<Manifesto of candidate 3>,...
