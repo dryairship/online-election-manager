@@ -31,6 +31,7 @@ This creates two executables in `$GOPATH/bin` :
 Also, copy the `sjcl.js` file into `assets/js/`. 
 ## Configuration
 You need to create a System Admin and populate the database with details of the students. You also need to create a configuration file which will export important values to the environment variables.
+
 ### Initializing the database
 - Start MongoDB.  
 `mongod`
@@ -42,15 +43,13 @@ You need to create a System Admin and populate the database with details of the 
 `> db.createUser({user: "ElectionAdmin", pwd: "password", roles: ["readWrite", "dbAdmin"]})`
 - Create a new collection called `students`.  
 `> db.createCollection("students")`
-- Fill this collection with the list of students eligible to vote. Each student is a separate document with three fields (all are strings) :
+- Fill this collection with the list of students (voters, candidates and the CEO). Each student is a separate document with three fields (all are strings) :
 	- `roll` - Roll number of the student.
 	- `email` - Just the username of the email address of the student (e.g. this field contains `darshi` if the email ID of the student is `darshi@iitk.ac.in`. *(The remaining part of the email ID will be specified in the configuration file)*.
 	- `name` - Full name of the student.
+
 ### Creating the election data CSV file
 Follow the template given in `configurationTemplates/electionData.csv` to create a CSV file containing the details of the posts for which the elections are being held, the voters eligible to vote for each post, and the candidates contesting the elections for various posts.
-
-### Creating the configuration file
-Follow the template given in `configurationTemplates/configuration.sh` and replace the default values with your own values.
 - You can have any number of posts. All the details of one post are in a single row.
 - The first value is the name of the post.
 - The second value is the regular expression that the students' roll number must match with, to check if they are eligible to vote for this post.
@@ -61,6 +60,10 @@ All these values occur alternately on the same row. Thus, the format for each ro
 ```
 <Name Of The Post>,<Regular expression for voters>,<Roll no. of candidate 1>,<Manifesto of candidate 1>,<Roll no. of candidate 2>,<Manifesto of candidate 2>,<Roll no. of candidate 3>,<Manifesto of candidate 3>,...
 ```
+
+### Creating the configuration file
+Follow the template given in `configurationTemplates/configuration.sh` and replace the default values with your own values.
+
 ## Deployment
 Follow these instructions to host an election using this application :
 - Start MongoDB in auth mode.  
