@@ -7,11 +7,11 @@ A cryptographically secure portal to manage online elections, created as a part 
 Follow these instructions to get a copy of the application on your computer :
 
 ### Prerequisites
-- **Go**
+- **Go**  
 Install Go (go1.11+) by following the instructions given on the [Go installation page](https://golang.org/doc/install).
-- **MongoDB**
+- **MongoDB**  
 Install MongoDB by following the instructions given on the [MongoDB installation page](https://docs.mongodb.com/manual/installation/).
-- **sjcl**
+- **sjcl**  
 	- You can either compile it yourself from the [source code](https://github.com/bitwiseshiftleft/sjcl) by following the instructions given [here](https://github.com/bitwiseshiftleft/sjcl/wiki/Getting-Started). [*Note that if you are compiling yourself, you need to do `./configure --with-ecc` before executing the `make` command.*]
 	- Or you can download a pre-compiled version (with the ecc feature) from [here](https://ufile.io/8zvrzwdx).
 	- You will need the `sjcl.js` file later.
