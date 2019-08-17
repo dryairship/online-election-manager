@@ -1,0 +1,15 @@
+{
+  "name": "result-calculation",
+  "version": "1.0.0",
+  "description": "Calculate results for online-election-manager",
+  "main": "calculate-result.js",
+  "scripts": {
+    "start": "node calculate-result.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Priydarshi Singh",
+  "license": "MIT",
+  "dependencies": {
+    "mongoose": "^5.6.9"
+  }
+}
