@@ -13,9 +13,10 @@ func SetUpRoutes(r *gin.Engine) {
 
 	users := r.Group("/users")
 	{
-		users.GET("/mail/:roll", controllers.SendMailToStudent)
+		users.POST("/mail/:roll", controllers.SendMailToStudent)
 		users.POST("/register", controllers.RegisterNewVoter)
 		users.POST("/login", controllers.CheckUserLogin)
+		users.GET("/captcha", controllers.GetCaptcha)
 	}
 
 	election := r.Group("/election")

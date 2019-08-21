@@ -113,9 +113,15 @@ function sendMail(){
     var notif = $('#mailNotification');
     notif.html("Sending mail...");
     notif.css("display","block");
+    var captcha = {
+        id: document.getElementById("captchaId").value,
+        value: document.getElementById("captchaValue").value
+    };
     $.ajax({
-        type: "GET",
+        type: "POST",
         url: "/users/mail/"+document.getElementById("rollForAuthCode").value,
+        dataType: 'json',
+        data: JSON.stringify(captcha),
         cache: false,
         success: function(response){
             notif.html(response);
@@ -123,6 +129,7 @@ function sendMail(){
             notif.removeClass("alert-info");
             notif.removeClass("alert-danger");
             notif.addClass("alert-success");
+            reloadCaptcha();
         },
         error: function(response){
             notif.html(response.responseText);
@@ -130,6 +137,7 @@ function sendMail(){
             notif.removeClass("alert-info");
             notif.removeClass("alert-success");
             notif.addClass("alert-danger");
+            reloadCaptcha();
         }
     });
 }
@@ -458,9 +466,21 @@ function showCandidatureConfirmed(){
     $("button").remove();
 }
 
+function reloadCaptcha() {
+    $.ajax({
+        type: "GET",
+        url: "/users/captcha",
+        cache: false,
+        success: function(response){
+            document.getElementById("captchaImg").src = response.value;
+            document.getElementById("captchaId").value = response.id;
+        }
+    });
+}
+
 // Load login page and seed the random bytes generator in SJCL.
 $(function(){
-    $("body").load("login.html");
+    $("body").load("login.html", reloadCaptcha);
     var arr = new Uint32Array(128);
     crypto.getRandomValues(arr);
     sjcl.random.addEntropy(arr, 1024, "crypto.randomBytes");

@@ -20,6 +20,11 @@ type UserError struct {
 	reason string
 }
 
+type CAPTCHA struct {
+	Id    string `json:"id"`
+	Value string `json:"value"`
+}
+
 func (err *UserError) Error() string {
 	return err.reason
 }
@@ -124,6 +129,15 @@ func SendMailToStudent(c *gin.Context) {
 		return
 	}
 
+	var captcha CAPTCHA
+	c.BindJSON(&captcha)
+
+	success := utils.VerifyCaptcha(captcha.Id, captcha.Value)
+	if !success {
+		c.String(http.StatusBadRequest, "Incorrect CAPTCHA")
+		return
+	}
+
 	roll := c.Param("roll")
 
 	if roll == "CEO" {
@@ -207,4 +221,14 @@ func CheckUserLogin(c *gin.Context) {
 
 	simplifiedVoter := voter.Simplify()
 	c.JSON(http.StatusOK, &simplifiedVoter)
+}
+
+func GetCaptcha(c *gin.Context) {
+	id, value := utils.CreateCaptcha()
+	captcha := CAPTCHA{
+		Id:    id,
+		Value: value,
+	}
+
+	c.JSON(http.StatusOK, &captcha)
 }
