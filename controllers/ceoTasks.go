@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/dryairship/online-election-manager/config"
+	"github.com/dryairship/online-election-manager/results"
 	"github.com/dryairship/online-election-manager/utils"
 )
 
@@ -215,4 +217,24 @@ func StopVoting(c *gin.Context) {
 
 	config.ElectionState = config.VotingStopped
 	c.String(http.StatusOK, "Voting Stopped")
+}
+
+func CalculateResult(c *gin.Context) {
+	id, err := utils.GetSessionID(c)
+	if err != nil || id != "CEO" {
+		c.String(http.StatusForbidden, "Only the CEO can access this.")
+		return
+	}
+
+	// if config.ElectionState != config.VotingStopped {
+	// 	c.String(http.StatusBadRequest, "Cannot calculate results until voting has stopped.")
+	// 	return
+	// }
+
+	go results.CalculateResult(&ElectionDb)
+	c.String(http.StatusOK, "Calculating Results")
+}
+
+func ResultProgress(c *gin.Context) {
+	c.String(http.StatusOK, fmt.Sprintf("%.3f%%", config.ResultProgress))
 }

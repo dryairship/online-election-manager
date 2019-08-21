@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const DBConnection = require('./db.js');
 const sjcl = require('./sjcl.js');
 
@@ -12,7 +14,7 @@ var fetchedVotes = [];
 var fetchedCandidates = [];
 var fetchedCEO;
 var privateKeyOfCEO;
-var result = {};
+var result = [];
 var scores = [];
 
 function unserializePrivateKey(serPriv){
@@ -22,7 +24,7 @@ function unserializePrivateKey(serPriv){
     );
 }
 
-function verifyIntegrityOfVote(voteResult) {
+function verifyIntegrityOfVote(voteResult, postid) {
     var isValid = true;
     if(voteResult[1] && voteResult[0].postid != voteResult[1].postid) isValid = false;
     if(voteResult[2] && voteResult[0].postid != voteResult[2].postid) isValid = false;
@@ -30,6 +32,7 @@ function verifyIntegrityOfVote(voteResult) {
     if(voteResult[1] && voteResult[2] && voteResult[1] == voteResult[2]) isValid = false;
     if(voteResult[1] && voteResult[3] && voteResult[1] == voteResult[3]) isValid = false;
     if(voteResult[2] && voteResult[3] && voteResult[2] == voteResult[3]) isValid = false;
+    if(postid>=10 && voteResult[1] && !voteResult[3]) isValid = false;
     return isValid;
 }
 
@@ -57,37 +60,60 @@ function analyzeVote(postid, vote, pref){
     };
 }
 
+function displayFinalTally() {
+    console.log("FinalTally")
+    result.forEach((postResult, postId) => {
+        postResult.forEach(candidateResult => {
+            console.log(postId+","+candidateResult[0]+","+candidateResult[1]+","+candidateResult[2]+","+candidateResult[3]);
+        });
+    });
+    process.exit();
+}
+
 function parseVotes(votes){
+    var splitData;
+    var percentageStatus;
+    var postid;
+    var voteResult;
+    var analysisResult;
+    var ballotId;
+    var pref;
+
     votes.forEach((thisVote, index) => {
-        var percentageStatus = (index*100.0/votes.length);
-        var postid = parseInt(thisVote.postid);
-        var voteResult = [thisVote];
-        var analysisResult;
-        var pref = 1;
+        percentageStatus = ((index+1)*100.0/votes.length);
+        postid = parseInt(thisVote.postid);
+        voteResult = [thisVote];
+        pref = 1;
         vote = sjcl.decrypt(privateKeyOfCEO, thisVote.data);
+
         for(i=1; vote!=null; i++){
             analysisResult = analyzeVote(postid, vote, i);
             if(analysisResult.correctCandidate==null){
+                splitData = analysisResult.newVote.split("$");
+                ballotId = splitData[splitData.length-1];
                 break;
             }else{
                 voteResult[i] = analysisResult.correctCandidate;
             }
             vote = analysisResult.newVote;
         }
-        if(verifyIntegrityOfVote(voteResult)){
+
+        if(verifyIntegrityOfVote(voteResult, postid)){
             if(voteResult[1]) result[postid][voteResult[1].roll][1] += 1;
+            else result[postid][0][1]+=1;
             if(voteResult[2]) result[postid][voteResult[2].roll][2] += 1;
             if(voteResult[3]) result[postid][voteResult[3].roll][3] += 1;
             var p1 = voteResult[1] ? voteResult[1].roll : '0';
             var p2 = voteResult[2] ? voteResult[2].roll : '0';
             var p3 = voteResult[3] ? voteResult[3].roll : '0';
-            insertVoteResult(voteResult[0]._id, p1, p2, p3)
-            .then(result => console.log(result))
-            .catch(err => console.log(err));
+            console.log(postid+","+ballotId+","+p1+","+p2+","+p3+","+percentageStatus);
+        } else {
+            console.log(postid+","+ballotId+",Invalid vote,,,"+percentageStatus);
+        }
+        if(index==votes.length-1){
+            displayFinalTally();
         }
     });
-    console.log(result);
-    process.exit();
 }
 
 getVotes()
@@ -98,8 +124,9 @@ getVotes()
 .then(candidates => {
     fetchedCandidates = candidates;
     fetchedCandidates.forEach(thisCandidate => {
-        if(!result[thisCandidate.postid]) result[thisCandidate.postid] = {};
-        result[thisCandidate.postid][thisCandidate.roll] = [0, 0, 0, 0];
+        if(!result[thisCandidate.postid]) result[thisCandidate.postid] = [];
+        if(!result[thisCandidate.postid][0]) result[thisCandidate.postid][0] = [0,0,0,0];
+        result[thisCandidate.postid][thisCandidate.roll] = [thisCandidate.roll, 0, 0, 0];
         thisCandidate.unserializedPrivateKey = unserializePrivateKey(thisCandidate.privatekey);
     })
     return getCEO();

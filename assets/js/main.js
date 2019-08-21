@@ -50,7 +50,7 @@ function attemptLogin(){
     });
 }
 
-// Fetch votes from the server and store them.
+// Fetch posts from the server and store them.
 function loadPosts(){
     $.ajax({
         type: "GET",
@@ -143,7 +143,7 @@ function register(){
     var pass2 = data[2].value;
     var auth = data[3].value;
     var passHash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(pass));
-    
+
     if(pass!=pass2){
         notif.html("The passwords do not match.");
         notif.css("display","block");
@@ -192,14 +192,14 @@ function vote(button){
     var pref = button.value[0];
     var candName = button.parentNode.firstChild.textContent;
     button.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
-    
+
     // To change the text in other buttons.
     document.querySelectorAll("#post"+postid+" #voteButton").forEach(function(el, ind, all){
         if(el.value[0]=="1")    el.value="2nd Preference";
         else if(el.value[0]=="2")    el.value="3rd Preference";
         else el.remove()
     });
-    
+
     // Show the newly added preference in the list.
     showVoted(candName,pref, postid);
     var intID = parseInt(postid);
@@ -226,6 +226,10 @@ function confirmVotes(){
     allPosts.forEach(function(post, ind, all){
         var pname = post["PostName"];
         var pid = parseInt(post["PostID"]);
+        if(pid>=10 && (votesCandidateNames[pid]==undefined || votesCandidateNames[pid].length<4)){
+            $("#badVotes").modal('show');
+            return;
+        }
         $("#confirmVotes .modal-body").append("<dl id='votes"+pid+"'><dt>"+pname+"</dt></dl>");
         if(votesCandidateNames[pid]==undefined || votesCandidateNames[pid].length==0){
             $("#votes"+pid).append("<dd>NOTA</dd>");
@@ -234,6 +238,7 @@ function confirmVotes(){
                 $("#votes"+pid).append("<dd>"+indC+") "+cand+"</dd>");
             });
         }
+        if(ind==all.length-1) $("#confirmVotes").modal('show');
     });
 }
 
@@ -260,7 +265,7 @@ function serializePrivateKey(priv){
 // Convert Public Key from Base64 to JSON
 function unserializePublicKey(serPub){
     return new sjcl.ecc.elGamal.publicKey(
-        sjcl.ecc.curves.c256, 
+        sjcl.ecc.curves.c256,
         sjcl.codec.base64.toBits(serPub)
     );
 }
