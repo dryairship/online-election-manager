@@ -3,10 +3,12 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/dryairship/online-election-manager/config"
+	"github.com/dryairship/online-election-manager/models"
 	"github.com/dryairship/online-election-manager/results"
 	"github.com/dryairship/online-election-manager/utils"
 )
@@ -19,10 +21,9 @@ type NewCEOData struct {
 
 // Struct to return candidates' data to the CEO.
 type CandidateData struct {
-	Name       string
-	Username   string
-	PrivateKey string
-	PostID     string
+	Name   string
+	Roll   string
+	PostID string
 }
 
 // API handler to send verification mail to CEO.
@@ -138,10 +139,9 @@ func FetchCandidates(c *gin.Context) {
 	data := make([]CandidateData, len(candidates))
 	for i, candidate := range candidates {
 		data[i] = CandidateData{
-			Name:       candidate.Name,
-			Username:   candidate.Username,
-			PrivateKey: candidate.PrivateKey,
-			PostID:     candidate.PostID,
+			Name:   candidate.Name,
+			Roll:   candidate.Roll,
+			PostID: candidate.PostID,
 		}
 	}
 	c.JSON(http.StatusOK, data)
@@ -237,4 +237,26 @@ func CalculateResult(c *gin.Context) {
 
 func ResultProgress(c *gin.Context) {
 	c.String(http.StatusOK, fmt.Sprintf("%.3f%%", config.ResultProgress))
+}
+
+func GetResult(c *gin.Context) {
+	id, err := utils.GetSessionID(c)
+	if err != nil || id != "CEO" {
+		c.String(http.StatusForbidden, "Only the CEO can access this.")
+		return
+	}
+
+	results, err := ElectionDb.FindAllResults()
+	if err != nil {
+		c.String(http.StatusBadRequest, "Cannot find results in the database.")
+		return
+	}
+
+	numericResults := make([]models.NumericResult, len(results))
+	for i, result := range results {
+		numericResults[i] = result.ToNumericResult()
+	}
+
+	sort.Sort(models.ResultSorter(numericResults))
+	c.JSON(http.StatusOK, &numericResults)
 }

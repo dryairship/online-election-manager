@@ -3,6 +3,7 @@ package results
 import (
 	"bufio"
 	"io"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -13,10 +14,31 @@ import (
 )
 
 var ElectionDb *db.ElectionDatabase
-var finalTally = false
 
 func CalculateResult(database *db.ElectionDatabase) {
 	ElectionDb = database
+
+	err := ElectionDb.ClearResults()
+	if err != nil {
+		panic(err)
+	}
+
+	votedVoters, err := ElectionDb.FindVotedVoters()
+	if err != nil {
+		panic(err)
+	}
+
+	votedVotersFile, err := os.Create(config.AssetsPath + "/votedVoters.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer votedVotersFile.Close()
+
+	votedVotersFile.WriteString("Roll Number,Name,\n")
+	for _, voter := range votedVoters {
+		votedVotersFile.WriteString(voter.Roll + "," + voter.Name + ",\n")
+	}
+
 	var cmd *exec.Cmd
 	if config.ApplicationStage == "development" {
 		cmd = exec.Command("node", "results/calculate-result.js")
@@ -40,6 +62,15 @@ func CalculateResult(database *db.ElectionDatabase) {
 
 func updateStatus(r io.Reader) {
 	scanner := bufio.NewScanner(r)
+
+	votesData, err := os.Create(config.AssetsPath + "/votesData.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer votesData.Close()
+
+	votesData.WriteString("Post ID,Ballot ID,Preference 1,Preference 2,Preference 3\n")
+
 	var inputLine string
 	var splitLine []string
 	var parsedVote models.ParsedVote
@@ -48,23 +79,18 @@ func updateStatus(r io.Reader) {
 	for scanner.Scan() {
 		inputLine = scanner.Text()
 
-		if inputLine == "FinalTally" {
-			finalTally = true
-			continue
-		}
-
 		splitLine = strings.Split(inputLine, ",")
 		if splitLine == nil {
 			continue
 		}
 
-		if finalTally {
+		if splitLine[0] == "FT" {
 			result = models.Result{
-				PostID:      splitLine[0],
-				Candidate:   splitLine[1],
-				Preference1: splitLine[2],
-				Preference2: splitLine[3],
-				Preference3: splitLine[4],
+				PostID:      splitLine[1],
+				Candidate:   splitLine[2],
+				Preference1: splitLine[3],
+				Preference2: splitLine[4],
+				Preference3: splitLine[5],
 			}
 			ElectionDb.InsertResult(&result)
 		} else {
@@ -76,6 +102,7 @@ func updateStatus(r io.Reader) {
 				Preference2: splitLine[3],
 				Preference3: splitLine[4],
 			}
+			votesData.WriteString(strings.Join(splitLine[:5], ",") + "\n")
 			ElectionDb.InsertParsedVote(&parsedVote)
 		}
 	}

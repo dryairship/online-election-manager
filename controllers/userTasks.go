@@ -166,6 +166,7 @@ func SendMailToStudent(c *gin.Context) {
 	recipient := voter.GetMailRecipient()
 	err = utils.SendMailTo(&recipient, "a voter")
 	if err != nil {
+		panic(err)
 		c.String(http.StatusInternalServerError, "Mailer Utility is not working.")
 		return
 	} else {

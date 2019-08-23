@@ -46,7 +46,17 @@ var (
 
 // Method to read the values of the global variables from environment variables.
 func InitializeConfiguration() {
-	ElectionState = AcceptingVotes
+	switch os.Getenv("OEMElectionState") {
+	case "VotingNotYetStarted":
+		ElectionState = VotingNotYetStarted
+	case "AcceptingVotes":
+		ElectionState = AcceptingVotes
+	case "VotingStopped":
+		ElectionState = VotingStopped
+	default:
+		panic("Election state not defined")
+	}
+
 	MailSenderEmailID = os.Getenv("OEMMailSenderEmailID")
 	MailSenderPassword = os.Getenv("OEMMailSenderPassword")
 	MailSubject = os.Getenv("OEMMailSubject")

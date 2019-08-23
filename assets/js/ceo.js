@@ -1,22 +1,98 @@
 var candidates;
 var totalPosts;
 var privateKeyOfCEO;
-var names = [];
+var names = {};
+var postNames = {};
+var postResults = {};
 var scores = [];
 var result = [];
 var votesStr = [];
 var usernames = [];
 var privateKeys = [];
 var finalUsernames = [];
-
+var progress;
 // Calculate the results.
 function calculate(){
     $("button").html("Display Final Tally");
     $("button").unbind('click');
-    $("button").on('click', function(){parseResults(displayResults);});
-    fetchPosts();
+    $("button")[0].style.display='none';
+    $("#ceomessage")[0].style.display='block';
+    $("button").on('click', fetchResults);
+    $.ajax({
+        type: "GET",
+        url:  "/ceo/calculateResult",
+        cache:false,
+        success: function(response){
+            startProgress();
+        }
+    });
 }
 
+function startProgress() {
+    setTimeout(() => {
+        if(progress=="100.000%"){
+            $("button")[0].style.display='block';
+            $("#ceomessage")[0].style.display='none';
+        } else {
+            checkProgress();
+        }
+    }, 1000);
+}
+
+function checkProgress() {
+    $.ajax({
+        type: "GET",
+        url:  "/ceo/resultProgress",
+        cache:false,
+        success: function(response){
+            progress = response;
+            $("#ceomessage")[0].innerHTML = "Progress : "+progress;
+        }
+    });
+    startProgress();
+}
+
+function fetchResults() {
+    $("button")[0].style.display='none';
+    $.ajax({
+        type: "GET",
+        url:  "/ceo/getResult",
+        cache:false,
+        success: function(response){
+            result = response;
+            processResult();
+        }
+    });
+}
+
+function processResult() {
+    result.forEach(el => {
+        if(!postResults[el.PostID]) {
+            postResults[el.PostID] = [];
+        }
+        if (el.Candidate == 0) {
+            postResults[el.PostID].unshift({
+                candidateRoll: el.Candidate,
+                candidateName: names[el.Candidate],
+                p1: el.Preference1,
+                p2: el.Preference2,
+                p3: el.Preference3
+            });
+        } else {
+            postResults[el.PostID].push({
+                candidateRoll: el.Candidate,
+                candidateName: names[el.Candidate],
+                p1: el.Preference1,
+                p2: el.Preference2,
+                p3: el.Preference3
+            });
+        }
+    });
+    displayResults();
+}
+
+
+/*
 // Call the findResult function for all posts and append the data to the page.
 function findAllResults(){
     totalPosts.forEach(function(el, ind, all){
@@ -81,7 +157,8 @@ function showVote(postid, arr, vote, size){
             $("#"+voteID).append("<td align='center'>"+voteData[i]+"</td>");
     }
 }
-
+*/
+/*
 // Find out winners and runners up from the decrypted votes.
 function parseResults(callback){
     $("button").remove();
@@ -100,7 +177,7 @@ function parseResults(callback){
     });
     callback();
 }
-
+*/
 // Display winners and runners up.
 function displayResults(){
     $("#postsTable>tbody").append("<tr><td align='center'><div class=\"alert alert-success mx-auto my-auto d-inline-flex\">Final Tally</div></td></tr>");
@@ -108,9 +185,12 @@ function displayResults(){
         $("#postsTable>tbody").append("<tr><td align='center' id='result"+el.postid+"'></td></tr>");
         $("#result"+el.postid).load("finalTally.html", function(){
             $("#result"+el.postid+" legend").html(el.postid+") "+el.postname);
-            for(var i=1; i<=3; i++){
-                var cand = finalUsernames[el.postid][i];
-                $("#result"+el.postid+" table>tbody").append("<tr id='res"+el.postid+"pos"+i+"'><td align='center'>"+i+"</td><td align='center'>"+getName(cand)+"</td><td align='center'>"+result[cand][1]+"</td><td align='center'>"+result[cand][2]+"</td><td align='center'>"+result[cand][3]+"</td></tr>");
+            var candD = postResults[el.postid][0];
+            if(parseInt(el.postid)<10) $("#result"+el.postid+" table>tbody").append("<tr id='res"+el.postid+"posNOTA'><td align='center'>NOTA</td><td align='center'>"+candD.candidateName+"</td><td align='center'>"+candD.p1+"</td><td align='center'>"+candD.p2+"</td><td align='center'>"+candD.p3+"</td></tr>");
+            var i0 = (el.postid<10?1:0);
+            for(var i=i0; i<postResults[el.postid].length; i++){
+                candD = postResults[el.postid][i];
+                $("#result"+el.postid+" table>tbody").append("<tr id='res"+el.postid+"posNOTA'><td align='center'>"+(i-i0+1)+"</td><td align='center'>"+candD.candidateName+"</td><td align='center'>"+candD.p1+"</td><td align='center'>"+candD.p2+"</td><td align='center'>"+candD.p3+"</td></tr>");
             }
         });
     });
@@ -128,7 +208,7 @@ function getName(candidate){
     });
     return name;
 }
-
+/*
 // Properly store fetched votes from the server into a suitable format in the global variables.
 function parseVotes(votes, callback){
     votes.forEach(function(el, ind, all){
@@ -139,34 +219,7 @@ function parseVotes(votes, callback){
     });
     callback();
 }
-
-// Extract candidates' names, usernames, keys from the fetched data.
-function parseCandidatesData(){
-    candidates.forEach(function(el, ind, all){
-        if(privateKeys[el.PostID]==undefined){
-            privateKeys[el.PostID] = [];
-            names[el.PostID] = [];
-            usernames[el.PostID] = [];
-        }
-        try {
-            privateKeys[el.PostID].push(unserializePrivateKey(el.PrivateKey));
-        } catch {}
-        names[el.PostID].push(el.Name);
-        usernames[el.PostID].push(el.Username);
-    });
-}
-
-// Fetch votes from the server.
-function fetchVotes(){
-    $.ajax({
-        type: "GET",
-        url:  "ceo/fetchVotes/",
-        cache:false,
-        success: function(response){
-            parseVotes(response,findAllResults);
-        }
-    });
-}
+*/
 
 // Fetch posts from the server.
 function fetchPosts(){
@@ -176,7 +229,9 @@ function fetchPosts(){
         cache:false,
         success: function(response){
             totalPosts = response;
-            fetchCandidates();
+            totalPosts.forEach(el => {
+                postNames[el.postid] = el.postname;
+            })
         },
         error: function(response){
             alert(response.responseText);
@@ -192,8 +247,10 @@ function fetchCandidates(){
         cache:false,
         success: function(response){
             candidates = response;
-            parseCandidatesData();
-            fetchVotes();
+            candidates.forEach(function(el, ind, all){
+                names[el.Roll] = el.Name;
+            });
+            names[0] = "NOTA";
         }
     });
 }
@@ -214,9 +271,7 @@ function startVoting(){
         contentType: 'application/json; charset=utf-8',
         cache:false,
         success: function(response){
-            $("button").html("Stop Voting");
-            $("button").unbind("click");
-            $("button").on('click', stopVoting);
+            $("#ceowelcome").append(" Voting period has started now.");
         },
         error: function(response){
             alert(response.responseText);
@@ -231,6 +286,7 @@ function stopVoting(){
         url:  "/ceo/stopVoting",
         cache:false,
         success: function(response){
+            $("#ceowelcome").append(" Voting period has stopped now.");
             $("button").html("Calculate Results");
             $("button").unbind("click");
             $("button").on('click', calculate);
@@ -265,4 +321,6 @@ function initializeCEO(){
         }
     });
     privateKeyOfCEO = unserializePrivateKey(userData.privatekey);
+    fetchCandidates();
+    fetchPosts();
 }

@@ -61,10 +61,9 @@ function analyzeVote(postid, vote, pref){
 }
 
 function displayFinalTally() {
-    console.log("FinalTally")
     result.forEach((postResult, postId) => {
         postResult.forEach(candidateResult => {
-            console.log(postId+","+candidateResult[0]+","+candidateResult[1]+","+candidateResult[2]+","+candidateResult[3]);
+            console.log("FT,"+postId+","+candidateResult[0]+","+candidateResult[1]+","+candidateResult[2]+","+candidateResult[3]);
         });
     });
     process.exit();
