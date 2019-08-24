@@ -33,7 +33,7 @@ function verifyIntegrityOfVote(voteResult, postid) {
     if(voteResult[1] && voteResult[2] && voteResult[1] == voteResult[2]) isValid = false;
     if(voteResult[1] && voteResult[3] && voteResult[1] == voteResult[3]) isValid = false;
     if(voteResult[2] && voteResult[3] && voteResult[2] == voteResult[3]) isValid = false;
-    if(postid>=10 && !voteResult[min(3,numCandsPerPost[postid])]) isValid = false;
+    if(postid>=10 && !voteResult[Math.min(3,numCandsPerPost[postid])]) isValid = false;
     return isValid;
 }
 

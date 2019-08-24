@@ -50,8 +50,8 @@ func main() {
 			if j <= 3 || j%2 == 1 {
 				continue
 			}
-			candidatesRollNumbers[j/2-1] = data
-			manifestoLinks[j/2-1] = postData[j+1]
+			candidatesRollNumbers[j/2-2] = data
+			manifestoLinks[j/2-2] = postData[j+1]
 		}
 
 		for j, cand := range candidatesRollNumbers {

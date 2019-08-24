@@ -237,7 +237,7 @@ function confirmVotes(){
         var pname = post["PostName"];
         var pid = parseInt(post["PostID"]);
         var noOfCandidatesVotedFor = votesCandidateNames[pid] && votesCandidateNames[pid]!=0 ? votesCandidateNames[pid].length-1 : 0;
-        if(pid>10 && noOfCandidatesVotedFor<min(3, numCandsPerPost[post.PostID])){
+        if(pid>10 && noOfCandidatesVotedFor<Math.min(3, numCandsPerPost[post.PostID])){
             $("#badVotes").modal('show');
             return;
         }
@@ -320,7 +320,7 @@ function encryptVotes(){
 
         var noOfCandidatesVotedFor = votesCandidateNames[pid] ? votesCandidateNames[pid].length : 0;
 
-        if(pid>10 && noOfCandidatesVotedFor<min(noOfCandidatesVotedFor, numCandsPerPost[post.PostID])){
+        if(pid>10 && noOfCandidatesVotedFor<Math.min(noOfCandidatesVotedFor, numCandsPerPost[post.PostID])){
             currentVote = "$".concat(ballotID);
         }else{
             currentVote = votesCandidateNames[pid].join("$").concat("$").concat(ballotID);
