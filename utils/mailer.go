@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/smtp"
 
@@ -9,78 +8,28 @@ import (
 	"github.com/dryairship/online-election-manager/models"
 )
 
+var auth smtp.Auth
+
+func AuthenticateMailer() {
+	auth = smtp.PlainAuth("", config.MailSenderUsername, config.MailSenderPassword, config.MailSMTPHost)
+}
+
 // Returns a string that represents the mail contents.
 func GenerateMail(recipient *models.MailRecipient, role string) string {
-	mail := fmt.Sprintf("From: %s\r\n", config.MailSenderEmailID) +
+	mail := fmt.Sprintf("From: %s\r\n", config.MailSenderUsername+"@iitk.ac.in") +
 		fmt.Sprintf("To: %s\r\n", recipient.EmailID) +
-		fmt.Sprintf("Subject: %s\r\n", config.MailSubject) +
+		"Subject: Mid-Term and By-Elections Verification Code\r\n" +
 		"\r\n" +
 		fmt.Sprintf("Dear %s,\r\n", recipient.Name) +
-		fmt.Sprintf("\tThank you for registering as %s for the upcoming Gymkhana Elections.\r\n", role) +
+		fmt.Sprintf("\tThank you for registering as %s for the Gymkhana Elections.\r\n", role) +
 		"\tUse the following Authentication Code to complete your registration :\r\n" +
 		fmt.Sprintf("\t\t%s\r\n", recipient.AuthCode) +
-		"Regards,\r\nChief Election Officer,\r\nElection Commission,\r\nStudents' Senate,\r\nIIT Kanpur."
+		"Regards,\r\nChief Election Officer,\r\nElection Commission,\r\nIIT Kanpur.\r\n"
 	return mail
 }
 
 func SendMailTo(recipient *models.MailRecipient, role string) error {
-	// Generate the mail contents for this recipient.
-	mail := GenerateMail(recipient, role)
-
-	// Set up authentication details.
-	auth := smtp.PlainAuth("", config.MailSenderEmailID, config.MailSenderPassword, config.MailSMTPHost)
-	tlsconfig := &tls.Config{
-		InsecureSkipVerify: true,
-		ServerName:         config.MailSMTPHost,
-	}
-
-	// Dial up the SMTP host for a connection.
-	connection, err := tls.Dial("tcp", config.MailSMTPHost+":"+config.MailSMTPPort, tlsconfig)
-	if err != nil {
-		return err
-	}
-
-	// Get the client object from the connection.
-	client, err := smtp.NewClient(connection, config.MailSMTPHost)
-	if err != nil {
-		return err
-	}
-
-	// Authenticate the client.
-	if err = client.Auth(auth); err != nil {
-		return err
-	}
-
-	// Set up the Mail ID of the sender.
-	if err = client.Mail(config.MailSenderEmailID); err != nil {
-		return err
-	}
-
-	// Set up the Mail ID of the recipient.
-	if err = client.Rcpt(recipient.EmailID); err != nil {
-		return err
-	}
-
-	// Get the stream to write the mail contents.
-	writer, err := client.Data()
-	if err != nil {
-		return err
-	}
-
-	// Wtite the mail contents to the stream.
-	_, err = writer.Write([]byte(mail))
-	if err != nil {
-		return err
-	}
-
-	// Close the stream.
-	err = writer.Close()
-	if err != nil {
-		return err
-	}
-
-	// Close the client connection.
-	client.Quit()
-
-	return nil
+	mail := []byte(GenerateMail(recipient, role))
+	to := []string{recipient.EmailID}
+	return smtp.SendMail(config.MailSMTPHost+":"+config.MailSMTPPort, auth, config.MailSenderUsername, to, mail)
 }

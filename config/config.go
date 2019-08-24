@@ -22,7 +22,7 @@ const (
 // Global variables used by the program
 var (
 	ElectionState        int
-	MailSenderEmailID    string
+	MailSenderUsername   string
 	MailSenderPassword   string
 	MailSubject          string
 	MailSMTPHost         string
@@ -54,10 +54,10 @@ func InitializeConfiguration() {
 	case "VotingStopped":
 		ElectionState = VotingStopped
 	default:
-		panic("Election state not defined")
+		panic("OEMElectionState should be one of {VotingNotYetStarted, AcceptingVotes, VotingStopped}")
 	}
 
-	MailSenderEmailID = os.Getenv("OEMMailSenderEmailID")
+	MailSenderUsername = os.Getenv("OEMMailSenderUsername")
 	MailSenderPassword = os.Getenv("OEMMailSenderPassword")
 	MailSubject = os.Getenv("OEMMailSubject")
 	MailSMTPHost = os.Getenv("OEMMailSMTPHost")
