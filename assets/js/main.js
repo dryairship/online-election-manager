@@ -4,6 +4,7 @@ var userData;
 var allPosts;
 var votesCandidateNames = [["MEOW"]];
 var votesCandidatePublicKeys = [["MEOW"]];
+var numCandsPerPost = {};
 var ballotIDs = [];
 var encryptedBallotIDs = [];
 var finalVotes = [];
@@ -66,6 +67,7 @@ function loadPosts(){
 // Load the candidates for a particular post on the client's device.
 function loadThisPost(post, ind, all){
     var postid = post["PostID"];
+    numCandsPerPost[postid] = post.Candidates.length;
     $("#postsTable>tbody").append("<tr><td align='center' id='post"+postid+"'></td></tr>");
     $("#post"+postid).load("candidatePanel.html", function(){
         $("#post"+postid+">#candidatePanel>.postname").html(post["PostName"])
@@ -234,7 +236,8 @@ function confirmVotes(){
     allPosts.forEach(function(post, ind, all){
         var pname = post["PostName"];
         var pid = parseInt(post["PostID"]);
-        if(pid>=10 && (votesCandidateNames[pid]==undefined || votesCandidateNames[pid].length<4)){
+        var noOfCandidatesVotedFor = votesCandidateNames[pid] && votesCandidateNames[pid]!=0 ? votesCandidateNames[pid].length-1 : 0;
+        if(pid>10 && noOfCandidatesVotedFor<min(3, numCandsPerPost[post.PostID])){
             $("#badVotes").modal('show');
             return;
         }
@@ -314,7 +317,10 @@ function encryptVotes(){
         var pid = parseInt(post["PostID"]);
         ballotIDs[pid] = ballotID;
         encryptedBallotIDs[pid] = encryptWithPassword(ballotID);
-        if(votesCandidateNames[pid] == undefined || votesCandidateNames[pid].length==0){
+
+        var noOfCandidatesVotedFor = votesCandidateNames[pid] ? votesCandidateNames[pid].length : 0;
+
+        if(pid>10 && noOfCandidatesVotedFor<min(noOfCandidatesVotedFor, numCandsPerPost[post.PostID])){
             currentVote = "$".concat(ballotID);
         }else{
             currentVote = votesCandidateNames[pid].join("$").concat("$").concat(ballotID);

@@ -16,6 +16,7 @@ var fetchedCEO;
 var privateKeyOfCEO;
 var result = [];
 var scores = [];
+var numCandsPerPost = {};
 
 function unserializePrivateKey(serPriv){
     return new sjcl.ecc.elGamal.secretKey(
@@ -32,7 +33,7 @@ function verifyIntegrityOfVote(voteResult, postid) {
     if(voteResult[1] && voteResult[2] && voteResult[1] == voteResult[2]) isValid = false;
     if(voteResult[1] && voteResult[3] && voteResult[1] == voteResult[3]) isValid = false;
     if(voteResult[2] && voteResult[3] && voteResult[2] == voteResult[3]) isValid = false;
-    if(postid>=10 && voteResult[1] && !voteResult[3]) isValid = false;
+    if(postid>=10 && !voteResult[min(3,numCandsPerPost[postid])]) isValid = false;
     return isValid;
 }
 
@@ -123,6 +124,10 @@ getVotes()
 .then(candidates => {
     fetchedCandidates = candidates;
     fetchedCandidates.forEach(thisCandidate => {
+        if(!numCandsPerPost[thisCandidate.postid])
+            numCandsPerPost[thisCandidate.postid] = 1;
+        else
+            numCandsPerPost[thisCandidate.postid] += 1;
         if(!result[thisCandidate.postid]) result[thisCandidate.postid] = [];
         if(!result[thisCandidate.postid][0]) result[thisCandidate.postid][0] = [0,0,0,0];
         result[thisCandidate.postid][thisCandidate.roll] = [thisCandidate.roll, 0, 0, 0];
