@@ -130,7 +130,11 @@ func SendMailToStudent(c *gin.Context) {
 	}
 
 	var captcha CAPTCHA
-	c.BindJSON(&captcha)
+	err := c.BindJSON(&captcha)
+	if err != nil {
+		c.String(http.StatusBadRequest, "LoL wut?")
+		return
+	}
 
 	success := utils.VerifyCaptcha(captcha.Id, captcha.Value)
 	if !success {
@@ -150,7 +154,7 @@ func SendMailToStudent(c *gin.Context) {
 		return
 	}
 
-	_, err := CanMailBeSentToStudent(roll)
+	_, err = CanMailBeSentToStudent(roll)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
@@ -158,7 +162,7 @@ func SendMailToStudent(c *gin.Context) {
 
 	skeleton, err := ElectionDb.FindStudentSkeleton(roll)
 	if err != nil {
-		c.String(http.StatusNotFound, "Invalid Roll Number.<br>Student does not exist.")
+		c.String(http.StatusNotFound, "Invalid Roll Number. Student does not exist.")
 		return
 	}
 
@@ -166,7 +170,6 @@ func SendMailToStudent(c *gin.Context) {
 	recipient := voter.GetMailRecipient()
 	err = utils.SendMailTo(&recipient, "a voter")
 	if err != nil {
-		panic(err)
 		c.String(http.StatusInternalServerError, "Mailer Utility is not working.")
 		return
 	} else {
@@ -176,7 +179,7 @@ func SendMailToStudent(c *gin.Context) {
 			return
 		}
 	}
-	c.String(http.StatusAccepted, "Verification Mail successfully sent<br>to "+voter.Email)
+	c.String(http.StatusAccepted, "Verification Mail successfully sent to "+voter.Email)
 }
 
 // API handler to check the user's login credentials.
