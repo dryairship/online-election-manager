@@ -1,48 +1,109 @@
 package db
 
 import (
-    "github.com/dryairship/online-election-manager/config"
-    "gopkg.in/mgo.v2"
+	"context"
+	"fmt"
+	"log"
+	"net/url"
+	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+
+	"github.com/dryairship/online-election-manager/config"
 )
 
 // Struct that is used to store the session of the database connection.
 type ElectionDatabase struct {
-    Session *mgo.Session
+	Session                     *mongo.Client
+	VotersCollection            *mongo.Collection
+	CandidatesCollection        *mongo.Collection
+	CeoCollection               *mongo.Collection
+	PostsCollection             *mongo.Collection
+	BallotIdsCollection         *mongo.Collection
+	SingleVoteResultsCollection *mongo.Collection
+	StudentsCollection          *mongo.Collection
+	VotesCollection             *mongo.Collection
 }
 
 // Function to establish database connection.
 func ConnectToDatabase() (ElectionDatabase, error) {
-    sess, err := mgo.Dial(config.MongoDialURL)
-    if err != nil {
-        return ElectionDatabase{nil}, err
-    }
-    err = sess.DB(config.MongoDbName).Login(config.MongoUsername, config.MongoPassword)
-    return ElectionDatabase{sess}, err
+	connectURL := fmt.Sprintf(
+		"mongodb://%s:%s@%s/%s",
+		url.QueryEscape(config.MongoUsername),
+		url.QueryEscape(config.MongoPassword),
+		config.MongoDialURL,
+		config.MongoDbName,
+	)
+
+	var electionDb ElectionDatabase
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(connectURL))
+	if err != nil {
+		log.Printf("[ERROR] Cannot connect to Mongo. Error: %v\n", err)
+		return electionDb, err
+	}
+
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err = mongoClient.Ping(ctx, readpref.Primary())
+	if err != nil {
+		log.Printf("[ERROR] Cannot Ping Mongo. Error: %v\n", err)
+		return electionDb, err
+	} else {
+		log.Println("[INFO] Successfully pinged Mongo")
+		electionDb.Session = mongoClient
+		electionDb.VotersCollection = mongoClient.Database(config.MongoDbName).Collection("voters")
+		electionDb.CandidatesCollection = mongoClient.Database(config.MongoDbName).Collection("candidates")
+		electionDb.CeoCollection = mongoClient.Database(config.MongoDbName).Collection("ceo")
+		electionDb.PostsCollection = mongoClient.Database(config.MongoDbName).Collection("posts")
+		electionDb.VotesCollection = mongoClient.Database(config.MongoDbName).Collection("votes")
+		electionDb.StudentsCollection = mongoClient.Database(config.MongoDbName).Collection("students")
+		electionDb.SingleVoteResultsCollection = mongoClient.Database(config.MongoDbName).Collection("singlevoteresults")
+		electionDb.BallotIdsCollection = mongoClient.Database(config.MongoDbName).Collection("ballotids")
+	}
+
+	ceo, err := electionDb.GetCEO()
+	if err != nil {
+		return electionDb, err
+	}
+	config.PublicKeyOfCEO = ceo.PublicKey
+
+	return electionDb, err
 }
 
 // Function to delete all entries from the database.
 func (db ElectionDatabase) ResetDatabase() error {
-    _, err := db.Session.DB(config.MongoDbName).C("candidates").RemoveAll(nil)
-    if err != nil {
-        return err
-    }
-    
-    _, err = db.Session.DB(config.MongoDbName).C("voters").RemoveAll(nil)
-    if err != nil {
-        return err
-    }
-    
-    _, err = db.Session.DB(config.MongoDbName).C("votes").RemoveAll(nil)
-    if err != nil {
-        return err
-    }
-    
-    _, err = db.Session.DB(config.MongoDbName).C("posts").RemoveAll(nil)
-    if err != nil {
-        return err
-    }
-    
-    _, err = db.Session.DB(config.MongoDbName).C("ceo").RemoveAll(nil)
-    return err
-}
+	err := db.CandidatesCollection.Drop(context.Background())
+	if err != nil {
+		return err
+	}
 
+	err = db.VotesCollection.Drop(context.Background())
+	if err != nil {
+		return err
+	}
+
+	err = db.PostsCollection.Drop(context.Background())
+	if err != nil {
+		return err
+	}
+
+	err = db.SingleVoteResultsCollection.Drop(context.Background())
+	if err != nil {
+		return err
+	}
+
+	err = db.BallotIdsCollection.Drop(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// TODO: ceo, voters
+	return nil
+}

@@ -1,37 +1,47 @@
 package db
 
-import(
-    "github.com/dryairship/online-election-manager/models"
-    "github.com/dryairship/online-election-manager/config"
-    "gopkg.in/mgo.v2/bson"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/dryairship/online-election-manager/models"
 )
 
 // Function to find the candidate with that username in the database.
 func (db ElectionDatabase) GetCandidate(username string) (models.Candidate, error) {
-    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
-    candidate := models.Candidate{}
-    err := candidatesCollection.Find(bson.M{"username":username}).One(&candidate)
-    return candidate, err
+	candidate := models.Candidate{}
+	err := db.CandidatesCollection.FindOne(context.Background(), bson.M{"username": username}).Decode(&candidate)
+	return candidate, err
 }
 
 // Function to find all candidates in the database.
 func (db ElectionDatabase) GetAllCandidates() ([]models.Candidate, error) {
-    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
-    var candidates []models.Candidate
-    err := candidatesCollection.Find(nil).All(&candidates)
-    return candidates, err
+	var candidates []models.Candidate
+
+	cursor, err := db.CandidatesCollection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return candidates, err
+	}
+
+	err = cursor.All(context.Background(), &candidates)
+	return candidates, err
 }
 
 // Function to update the details of a candidate.
 func (db ElectionDatabase) UpdateCandidate(username string, newCandidate *models.Candidate) error {
-    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
-    err := candidatesCollection.Update(bson.M{"username":username}, &newCandidate)
-    return err
+	_, err := db.CandidatesCollection.UpdateOne(context.Background(), bson.M{"username": username}, newCandidate)
+	return err
 }
 
 // Function to insert a new candidate in the database.
 func (db ElectionDatabase) AddNewCandidate(candidate *models.Candidate) error {
-    candidatesCollection := db.Session.DB(config.MongoDbName).C("candidates")
-    err := candidatesCollection.Insert(&candidate)
-    return err
+	_, err := db.CandidatesCollection.InsertOne(context.Background(), candidate)
+	return err
+}
+
+// Function to delete a candidate from the database.
+func (db ElectionDatabase) EliminateCandidate(postId, roll string) error {
+	_, err := db.CandidatesCollection.DeleteOne(context.Background(), bson.M{"postid": postId, "roll": roll})
+	return err
 }

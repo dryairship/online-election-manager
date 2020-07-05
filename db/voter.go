@@ -1,45 +1,60 @@
 package db
 
 import (
-	"github.com/dryairship/online-election-manager/config"
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/dryairship/online-election-manager/models"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // Function to find the basic details of a student from its roll number.
 func (db ElectionDatabase) FindStudentSkeleton(roll string) (models.StudentSkeleton, error) {
-	studentsCollection := db.Session.DB(config.MongoDbName).C("students")
 	skeleton := models.StudentSkeleton{}
-	err := studentsCollection.Find(bson.M{"roll": roll}).One(&skeleton)
+	err := db.StudentsCollection.FindOne(context.Background(), bson.M{"roll": roll}).Decode(&skeleton)
 	return skeleton, err
 }
 
 // Function to find a voter in the database.
 func (db ElectionDatabase) FindVoter(roll string) (models.Voter, error) {
-	votersCollection := db.Session.DB(config.MongoDbName).C("voters")
 	voter := models.Voter{}
-	err := votersCollection.Find(bson.M{"roll": roll}).One(&voter)
+	err := db.VotersCollection.FindOne(context.Background(), bson.M{"roll": roll}).Decode(&voter)
 	return voter, err
 }
 
 // Function to find voters who have voted.
 func (db ElectionDatabase) FindVotedVoters() ([]models.Voter, error) {
-	votersCollection := db.Session.DB(config.MongoDbName).C("voters")
 	var voters []models.Voter
-	err := votersCollection.Find(bson.M{"voted": true}).All(&voters)
+	cursor, err := db.VotersCollection.Find(context.Background(), bson.M{"voted": true})
+	if err != nil {
+		return voters, err
+	}
+
+	err = cursor.All(context.Background(), &voters)
 	return voters, err
 }
 
 // Function to insert a new voter into the database.
 func (db ElectionDatabase) AddNewVoter(voter *models.Voter) error {
-	votersCollection := db.Session.DB(config.MongoDbName).C("voters")
-	err := votersCollection.Insert(&voter)
+	_, err := db.VotersCollection.InsertOne(context.Background(), voter)
 	return err
 }
 
 // Function to update the details of a voter.
 func (db ElectionDatabase) UpdateVoter(roll string, newVoter *models.Voter) error {
-	votersCollection := db.Session.DB(config.MongoDbName).C("voters")
-	err := votersCollection.Update(bson.M{"roll": roll}, &newVoter)
+	_, err := db.VotersCollection.UpdateOne(context.Background(), bson.M{"roll": roll}, newVoter)
+	return err
+}
+
+func (db ElectionDatabase) MarkAllVotersUnvoted() error {
+	emptyArray := make([]models.BallotID, 0)
+	_, err := db.VotersCollection.UpdateMany(
+		context.Background(),
+		bson.M{},
+		bson.M{"$set": bson.M{
+			"voted":    false,
+			"ballotid": emptyArray,
+		}},
+	)
 	return err
 }
