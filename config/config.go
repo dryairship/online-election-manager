@@ -10,6 +10,7 @@ const (
 	VotingNotYetStarted = iota
 	AcceptingVotes
 	VotingStopped
+	ResultsAvailable
 )
 
 // Possible states for a candidate
@@ -23,6 +24,7 @@ const (
 var (
 	ElectionState        int
 	MailSenderUsername   string
+	MailSenderEmailID    string
 	MailSenderPassword   string
 	MailSubject          string
 	MailSMTPHost         string
@@ -57,6 +59,7 @@ func InitializeConfiguration() {
 		panic("OEMElectionState should be one of {VotingNotYetStarted, AcceptingVotes, VotingStopped}")
 	}
 
+	MailSenderEmailID = os.Getenv("OEMMailSenderEmailID")
 	MailSenderUsername = os.Getenv("OEMMailSenderUsername")
 	MailSenderPassword = os.Getenv("OEMMailSenderPassword")
 	MailSubject = os.Getenv("OEMMailSubject")
