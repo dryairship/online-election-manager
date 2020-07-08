@@ -78,3 +78,13 @@ func GetElectionState(c *gin.Context) {
 
 	c.String(http.StatusOK, string(48+config.ElectionState))
 }
+
+func GetSingleVoteResults(c *gin.Context) {
+	result, err := ElectionDb.FindAllSingleVoteResults()
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Database Error")
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}

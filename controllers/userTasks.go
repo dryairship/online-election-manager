@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"regexp"
 
@@ -50,7 +49,7 @@ func GetPostsForVoter(roll string) []models.VotablePost {
 	for _, post := range Posts {
 		pattern := post.VoterRegex
 		canVote, err := regexp.MatchString(pattern, roll)
-		if err == nil && canVote {
+		if err == nil && canVote && !post.Resolved {
 			votablePosts = append(votablePosts, post.ConvertToVotablePost())
 		}
 	}
@@ -67,6 +66,10 @@ func GetVotablePosts(c *gin.Context) {
 
 	votablePosts := GetPostsForVoter(roll)
 	c.JSON(http.StatusOK, votablePosts)
+}
+
+func GetAllPosts(c *gin.Context) {
+	c.JSON(http.StatusOK, Posts)
 }
 
 // API handler to register a new voter.
@@ -92,7 +95,7 @@ func RegisterNewVoter(c *gin.Context) {
 
 	voter, err := ElectionDb.FindVoter(roll)
 	if err != nil {
-		c.String(http.StatusForbidden, "You need to get a verification<br>mail before you register.")
+		c.String(http.StatusForbidden, "You need to get a verification mail before you register.")
 		return
 	}
 
@@ -186,9 +189,6 @@ func SendMailToStudent(c *gin.Context) {
 func CheckUserLogin(c *gin.Context) {
 	roll := c.PostForm("roll")
 	passHash := c.PostForm("pass")
-
-	fmt.Println(roll)
-	fmt.Println(passHash)
 
 	if roll == "CEO" {
 		CEOLogin(c)

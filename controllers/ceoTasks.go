@@ -21,16 +21,46 @@ type NewCEOData struct {
 
 // Struct to return candidates' data to the CEO.
 type CandidateData struct {
-	Name   string
-	Roll   string
-	PostID string
+	Name       string
+	Roll       string
+	PostID     string
+	PrivateKey string
+}
+
+type EliminatedCandidate struct {
+	PostID string `json:"postId"`
+	Roll   string `json:"roll"`
+}
+
+type NextRoundData struct {
+	EliminatedCandidates []EliminatedCandidate `json:"eliminatedCandidates"`
+	ResolvedPosts        []string              `json:"resolvedPosts"`
+}
+
+type CandidateResult struct {
+	Roll      string   `json:"roll"`
+	Name      string   `json:"name"`
+	Count     int32    `json:"count"`
+	BallotIDs []string `json:"ballotIds"`
+	Status    string   `json:"status"`
+}
+
+type PostResult struct {
+	ID         string            `json:"postid"`
+	Name       string            `json:"postname"`
+	Resolved   bool              `json:"resolved"`
+	Candidates []CandidateResult `json:"candidates"`
+}
+
+type ResultData struct {
+	Posts []PostResult `json:"posts"`
 }
 
 // API handler to send verification mail to CEO.
 func SendMailToCEO(c *gin.Context) {
 	ceo, err := ElectionDb.GetCEO()
 	if err == nil {
-		c.String(http.StatusForbidden, "Verification mail has already<br>been sent to CEO.")
+		c.String(http.StatusForbidden, "Verification mail has already been sent to CEO.")
 		return
 	}
 
@@ -53,7 +83,7 @@ func SendMailToCEO(c *gin.Context) {
 			return
 		}
 	}
-	c.String(http.StatusAccepted, "Verification Mail successfully sent<br>to "+ceo.Email)
+	c.String(http.StatusAccepted, "Verification Mail successfully sent to "+ceo.Email)
 }
 
 // API handler to register CEO's account.
@@ -63,7 +93,7 @@ func RegisterCEO(c *gin.Context) {
 
 	ceo, err := ElectionDb.GetCEO()
 	if err != nil {
-		c.String(http.StatusForbidden, "You need to get a verification<br>mail before you register.")
+		c.String(http.StatusForbidden, "You need to get a verification mail before you register.")
 		return
 	}
 
@@ -139,9 +169,10 @@ func FetchCandidates(c *gin.Context) {
 	data := make([]CandidateData, len(candidates))
 	for i, candidate := range candidates {
 		data[i] = CandidateData{
-			Name:   candidate.Name,
-			Roll:   candidate.Roll,
-			PostID: candidate.PostID,
+			Name:       candidate.Name,
+			Roll:       candidate.Roll,
+			PostID:     candidate.PostID,
+			PrivateKey: candidate.PrivateKey,
 		}
 	}
 	c.JSON(http.StatusOK, data)
@@ -259,4 +290,119 @@ func GetResult(c *gin.Context) {
 
 	sort.Sort(models.ResultSorter(numericResults))
 	c.JSON(http.StatusOK, &numericResults)
+}
+
+func PrepareForNextRound(c *gin.Context) {
+	id, err := utils.GetSessionID(c)
+	if err != nil || id != "CEO" {
+		c.String(http.StatusForbidden, "Only the CEO can access this.")
+		return
+	}
+
+	var nextRoundData NextRoundData
+	err = c.BindJSON(&nextRoundData)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Data format not recognized.")
+		return
+	}
+
+	for _, candidate := range nextRoundData.EliminatedCandidates {
+		err = ElectionDb.EliminateCandidate(candidate.PostID, candidate.Roll)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Database Error")
+			return
+		}
+	}
+
+	for _, post := range nextRoundData.ResolvedPosts {
+		err = ElectionDb.MarkPostResolved(post)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Database Error")
+			return
+		}
+	}
+
+	err = ElectionDb.MarkAllVotersUnvoted()
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Database Error")
+		return
+	}
+
+	err = ElectionDb.DeleteAllVotes()
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Database Error")
+		return
+	}
+
+	c.String(http.StatusOK, "Ready for next round.")
+}
+
+func SubmitSingleVoteResults(c *gin.Context) {
+	id, err := utils.GetSessionID(c)
+	if err != nil || id != "CEO" {
+		c.String(http.StatusForbidden, "Only the CEO can access this.")
+		return
+	}
+
+	var results ResultData
+	err = c.BindJSON(&results)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Data format not recognized.")
+		return
+	}
+
+	for _, post := range results.Posts {
+		var ballotIds []models.UsedBallotID
+		postId := post.ID
+		if post.Resolved {
+			if err := ElectionDb.MarkPostResolved(postId); err != nil {
+				c.String(http.StatusBadRequest, "Database error.")
+				return
+			}
+		}
+		singleVoteResult := models.SingleVoteResult{
+			ID:   postId,
+			Name: post.Name,
+		}
+		var candidateResults []models.CandidateResult
+		for _, candidate := range post.Candidates {
+			tmpBallotId := models.UsedBallotID{
+				Name: candidate.Name,
+				Roll: candidate.Roll,
+			}
+			for _, ballotString := range candidate.BallotIDs {
+				tmpBallotId.BallotString = ballotString
+				ballotIds = append(ballotIds, tmpBallotId)
+			}
+			candidateResult := models.CandidateResult{
+				Name:   candidate.Name,
+				Roll:   candidate.Roll,
+				Count:  candidate.Count,
+				Status: candidate.Status,
+			}
+			candidateResults = append(candidateResults, candidateResult)
+		}
+		singleVoteResult.Candidates = candidateResults
+
+		err = ElectionDb.InsertSingleVoteResult(&singleVoteResult)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Database error.")
+			return
+		}
+
+		err = utils.ExportBallotIdsToFile(ballotIds, postId)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Cannot export BallotIds.")
+			return
+		}
+	}
+
+	Posts, err = ElectionDb.GetPosts()
+	if err != nil {
+		c.String(http.StatusBadRequest, "Database error.")
+		return
+	}
+
+	config.ElectionState = config.ResultsAvailable
+	c.String(http.StatusAccepted, "Results accepted.")
 }

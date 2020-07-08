@@ -23,8 +23,10 @@ func SetUpRoutes(r *gin.Engine) {
 	{
 		election.GET("/getVotablePosts", controllers.GetVotablePosts)
 		election.GET("/getCandidateCard/:username", controllers.GetCandidateCard)
+		election.GET("/getCandidateInfo/:username", controllers.GetCandidateInfo)
 		election.GET("/getElectionState", controllers.GetElectionState)
 		election.POST("/submitVote", controllers.SubmitVote)
+		election.GET("/results", controllers.GetSingleVoteResults)
 	}
 
 	ceo := r.Group("/ceo")
@@ -32,10 +34,12 @@ func SetUpRoutes(r *gin.Engine) {
 		ceo.POST("/startVoting", controllers.StartVoting)
 		ceo.POST("/stopVoting", controllers.StopVoting)
 		ceo.GET("/fetchPosts", controllers.FetchPosts)
+		ceo.GET("/fetchVotes", controllers.FetchVotes)
 		ceo.GET("/fetchCandidates", controllers.FetchCandidates)
 		ceo.GET("/calculateResult", controllers.CalculateResult)
 		ceo.GET("/resultProgress", controllers.ResultProgress)
 		ceo.GET("/getResult", controllers.GetResult)
+		ceo.POST("/submitResults", controllers.SubmitSingleVoteResults)
 	}
 
 	candidate := r.Group("/candidate")
