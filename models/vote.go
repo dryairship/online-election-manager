@@ -30,6 +30,12 @@ type (
 		BallotString string `json:"BallotString"`
 		VoteData     string `json:"VoteData"`
 	}
+
+	UsedBallotID struct {
+		BallotString string
+		Roll         string
+		Name         string
+	}
 )
 
 // Function to get the actual data of the vote from it.
