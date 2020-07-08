@@ -3,13 +3,30 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
-	"strings"
+	"log"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/dryairship/online-election-manager/config"
 	"github.com/dryairship/online-election-manager/db"
 	"github.com/dryairship/online-election-manager/models"
 )
+
+type InitCandidate struct {
+	Roll      string
+	Manifesto string
+}
+
+type InitPost struct {
+	Id         string
+	Name       string
+	Regex      string
+	Candidates []InitCandidate
+}
+
+type InitData struct {
+	Posts []InitPost
+}
 
 func main() {
 	// Initialize the configuration from environment variables.
@@ -18,77 +35,61 @@ func main() {
 	// Connect to the database.
 	electionDb, err := db.ConnectToDatabase()
 	if err != nil {
-		fmt.Println("[ERROR] Could not establish database connection.")
-		os.Exit(1)
+		log.Fatal("[ERROR] Could not establish database connection.")
 	}
 
 	// Delete all entries from the database.
-	electionDb.ResetDatabase()
-
-	// Open the CSV file for reading the data about posts and candidates.
-	file, err := ioutil.ReadFile(config.ElectionDataFilePath)
+	err = electionDb.ResetDatabase()
 	if err != nil {
-		fmt.Println("[ERROR] Election Data file not found.")
-		os.Exit(1)
+		log.Fatal("[ERROR] Could not reset database.")
 	}
 
-	// Convert data into a simpler format.
-	allData := strings.TrimSpace(string(file))
-	posts := strings.Split(allData, "\n")
+	// Open the CSV file for reading the data about posts and candidates.
+	fileData, err := ioutil.ReadFile(config.ElectionDataFilePath)
+	if err != nil {
+		log.Fatal("[ERROR] Election Data file not found.")
+	}
 
-	for _, post := range posts {
-		// Extract data about a post from the data read from the file.
-		postData := strings.Split(post, ",")
-		postID := postData[0]
-		postName := postData[1] + ", " + postData[2]
-		postRegex := postData[3]
-		candidatesRollNumbers := make([]string, len(postData)/2-2)
-		candidatesUsernames := make([]string, len(postData)/2-2)
-		manifestoLinks := make([]string, len(postData)/2-2)
+	var data InitData
+	err = yaml.Unmarshal(fileData, &data)
+	if err != nil {
+		log.Fatal("[ERROR] Election Data is not in the correct format.")
+	}
 
-		for j, data := range postData {
-			if j <= 3 || j%2 == 1 {
-				continue
-			}
-			candidatesRollNumbers[j/2-2] = data
-			manifestoLinks[j/2-2] = postData[j+1]
-		}
+	for _, post := range data.Posts {
 
-		for j, cand := range candidatesRollNumbers {
-			candidate, err := CreateCandidate(&electionDb, postID, cand, manifestoLinks[j])
+		var candidatesUsernames []string
+
+		for _, candidateData := range post.Candidates {
+			candidate, err := CreateCandidate(&electionDb, post.Id, candidateData.Roll, candidateData.Manifesto)
 			if err != nil {
-				fmt.Printf("[ERROR] Cannot find candidate %s\n", cand)
-				electionDb.ResetDatabase()
-				os.Exit(1)
+				log.Fatalf("[ERROR] Cannot find candidate %s\n", candidateData.Roll)
 			}
 
-			candidatesUsernames[j] = candidate.Username
+			candidatesUsernames = append(candidatesUsernames, candidate.Username)
 
 			// Insert the newly created candidate into the database.
 			err = electionDb.AddNewCandidate(&candidate)
 			if err != nil {
-				fmt.Printf("[ERROR] Cannot add candidate %s\n", cand)
-				electionDb.ResetDatabase()
-				os.Exit(1)
+				log.Fatalf("[ERROR] Cannot add candidate %s\n", candidateData.Roll)
 			}
 		}
 
 		fullPost := models.Post{
-			PostID:     postID,
-			PostName:   postName,
-			VoterRegex: postRegex,
+			PostID:     post.Id,
+			PostName:   post.Name,
+			VoterRegex: post.Regex,
 			Candidates: candidatesUsernames,
+			Resolved:   false,
 		}
 
 		// Insert the newly created post into the database.
 		err = electionDb.AddNewPost(&fullPost)
 
 		if err != nil {
-			fmt.Printf("[ERROR] Cannot insert post %s\n", postName)
-			electionDb.ResetDatabase()
-			os.Exit(1)
+			log.Fatalf("[ERROR] Cannot insert post %s\n", post.Name)
 		} else {
-			fmt.Printf("Succesfully added the post of %s.\n", postName)
+			log.Printf("Succesfully added the post of %s.\n", post.Name)
 		}
 	}
 }
