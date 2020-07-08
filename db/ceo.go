@@ -23,6 +23,6 @@ func (db ElectionDatabase) InsertCEO(ceo *models.CEO) error {
 
 // Function ot update the details of the CEO.
 func (db ElectionDatabase) UpdateCEO(newCEO *models.CEO) error {
-	_, err := db.CeoCollection.UpdateOne(context.Background(), bson.M{"username": "CEO"}, &newCEO)
+	_, err := db.CeoCollection.ReplaceOne(context.Background(), bson.M{"username": "CEO"}, &newCEO)
 	return err
 }

@@ -30,7 +30,7 @@ func (db ElectionDatabase) GetAllCandidates() ([]models.Candidate, error) {
 
 // Function to update the details of a candidate.
 func (db ElectionDatabase) UpdateCandidate(username string, newCandidate *models.Candidate) error {
-	_, err := db.CandidatesCollection.UpdateOne(context.Background(), bson.M{"username": username}, newCandidate)
+	_, err := db.CandidatesCollection.ReplaceOne(context.Background(), bson.M{"username": username}, newCandidate)
 	return err
 }
 

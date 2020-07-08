@@ -42,7 +42,7 @@ func (db ElectionDatabase) AddNewVoter(voter *models.Voter) error {
 
 // Function to update the details of a voter.
 func (db ElectionDatabase) UpdateVoter(roll string, newVoter *models.Voter) error {
-	_, err := db.VotersCollection.UpdateOne(context.Background(), bson.M{"roll": roll}, newVoter)
+	_, err := db.VotersCollection.ReplaceOne(context.Background(), bson.M{"roll": roll}, newVoter)
 	return err
 }
 
