@@ -27,16 +27,6 @@ type CandidateData struct {
 	PrivateKey string
 }
 
-type EliminatedCandidate struct {
-	PostID string `json:"postId"`
-	Roll   string `json:"roll"`
-}
-
-type NextRoundData struct {
-	EliminatedCandidates []EliminatedCandidate `json:"eliminatedCandidates"`
-	ResolvedPosts        []string              `json:"resolvedPosts"`
-}
-
 type CandidateResult struct {
 	Roll      string   `json:"roll"`
 	Name      string   `json:"name"`
@@ -299,29 +289,6 @@ func PrepareForNextRound(c *gin.Context) {
 		return
 	}
 
-	var nextRoundData NextRoundData
-	err = c.BindJSON(&nextRoundData)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Data format not recognized.")
-		return
-	}
-
-	for _, candidate := range nextRoundData.EliminatedCandidates {
-		err = ElectionDb.EliminateCandidate(candidate.PostID, candidate.Roll)
-		if err != nil {
-			c.String(http.StatusInternalServerError, "Database Error")
-			return
-		}
-	}
-
-	for _, post := range nextRoundData.ResolvedPosts {
-		err = ElectionDb.MarkPostResolved(post)
-		if err != nil {
-			c.String(http.StatusInternalServerError, "Database Error")
-			return
-		}
-	}
-
 	err = ElectionDb.MarkAllVotersUnvoted()
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Database Error")
@@ -375,12 +342,19 @@ func SubmitSingleVoteResults(c *gin.Context) {
 				ballotIds = append(ballotIds, tmpBallotId)
 			}
 			candidateResult := models.CandidateResult{
-				Name:   candidate.Name,
-				Roll:   candidate.Roll,
-				Count:  candidate.Count,
-				Status: candidate.Status,
+				Name:  candidate.Name,
+				Roll:  candidate.Roll,
+				Count: candidate.Count,
 			}
 			candidateResults = append(candidateResults, candidateResult)
+
+			if candidate.Status == "eliminated" {
+				err = ElectionDb.EliminateCandidate(postId, candidate.Roll)
+				if err != nil {
+					c.String(http.StatusInternalServerError, "Database error.")
+					return
+				}
+			}
 		}
 		singleVoteResult.Candidates = candidateResults
 

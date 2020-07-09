@@ -27,7 +27,7 @@ func (db ElectionDatabase) InsertParsedVote(parsedVote *models.ParsedVote) error
 func (db ElectionDatabase) GetVotes() ([]models.Vote, error) {
 	var votes []models.Vote
 
-	cursor, err := db.CandidatesCollection.Find(context.Background(), bson.M{})
+	cursor, err := db.VotesCollection.Find(context.Background(), bson.M{})
 	if err != nil {
 		return votes, err
 	}

@@ -20,7 +20,7 @@ func ExportBallotIdsToFile(ballotIds []models.UsedBallotID, fileName string) err
 	w := bufio.NewWriter(file)
 
 	for _, ballotId := range ballotIds {
-		_, err = w.WriteString(fmt.Sprintf("%s - %s - %s", ballotId.BallotString, ballotId.Roll, ballotId.Name))
+		_, err = w.WriteString(fmt.Sprintf("%s - %s - %s\n", ballotId.BallotString, ballotId.Roll, ballotId.Name))
 		if err != nil {
 			return err
 		}

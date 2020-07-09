@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 
@@ -42,6 +43,15 @@ func (db ElectionDatabase) AddNewCandidate(candidate *models.Candidate) error {
 
 // Function to delete a candidate from the database.
 func (db ElectionDatabase) EliminateCandidate(postId, roll string) error {
-	_, err := db.CandidatesCollection.DeleteOne(context.Background(), bson.M{"postid": postId, "roll": roll})
+	username := fmt.Sprintf("P%sC%s", postId, roll)
+	_, err := db.PostsCollection.UpdateOne(
+		context.Background(),
+		bson.M{"postid": postId},
+		bson.M{
+			"$pull": bson.M{
+				"candidates": username,
+			},
+		},
+	)
 	return err
 }

@@ -28,7 +28,7 @@ func (db ElectionDatabase) AddNewPost(post *models.Post) error {
 }
 
 func (db ElectionDatabase) DeletePost(postId string) error {
-	_, err := db.PostsCollection.DeleteOne(context.Background(), bson.M{"postd": postId})
+	_, err := db.PostsCollection.DeleteOne(context.Background(), bson.M{"postid": postId})
 	return err
 }
 

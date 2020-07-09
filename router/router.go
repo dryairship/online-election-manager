@@ -40,6 +40,7 @@ func SetUpRoutes(r *gin.Engine) {
 		ceo.GET("/resultProgress", controllers.ResultProgress)
 		ceo.GET("/getResult", controllers.GetResult)
 		ceo.POST("/submitResults", controllers.SubmitSingleVoteResults)
+		ceo.POST("/prepareForNextRound", controllers.PrepareForNextRound)
 	}
 
 	candidate := r.Group("/candidate")
