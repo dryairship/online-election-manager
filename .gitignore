@@ -1,3 +1,8 @@
 assets/js/sjcl.js
 cmd/demo-initialization
 *node_modules
+results
+assets
+cmd/old
+cache*
+TODO.md
