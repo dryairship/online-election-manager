@@ -10,7 +10,7 @@ import (
 )
 
 func ExportBallotIdsToFile(ballotIds []models.UsedBallotID, fileName string) error {
-	path := fmt.Sprintf("%s/ballotids/%s", config.AssetsPath, fileName)
+	path := fmt.Sprintf("%s/%s", config.BallotIDsPath, fileName)
 	file, err := os.Create(path)
 	if err != nil {
 		return err

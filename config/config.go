@@ -35,6 +35,7 @@ var (
 	MongoUsername        string
 	MongoPassword        string
 	AssetsPath           string
+	BallotIDsPath        string
 	ElectionDataFilePath string
 	ApplicationPort      string
 	SessionsKey          string
@@ -55,8 +56,10 @@ func InitializeConfiguration() {
 		ElectionState = AcceptingVotes
 	case "VotingStopped":
 		ElectionState = VotingStopped
+	case "ResultsCalculated":
+		ElectionState = ResultsAvailable
 	default:
-		panic("OEMElectionState should be one of {VotingNotYetStarted, AcceptingVotes, VotingStopped}")
+		panic("OEMElectionState should be one of {VotingNotYetStarted, AcceptingVotes, VotingStopped, ResultsCalculated}")
 	}
 
 	MailSenderEmailID = os.Getenv("OEMMailSenderEmailID")
@@ -73,6 +76,7 @@ func InitializeConfiguration() {
 	MongoPassword = os.Getenv("OEMMongoPassword")
 
 	AssetsPath = os.Getenv("OEMAssetsPath")
+	BallotIDsPath = os.Getenv("OEMBallotIDsPath")
 	ElectionDataFilePath = os.Getenv("OEMElectionDataFilePath")
 	ApplicationPort = os.Getenv("OEMApplicationPort")
 	SessionsKey = os.Getenv("OEMSessionsKey")
