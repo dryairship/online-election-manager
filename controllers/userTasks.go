@@ -205,11 +205,6 @@ func CheckUserLogin(c *gin.Context) {
 		return
 	}
 
-	if config.ElectionState == config.VotingStopped {
-		c.String(http.StatusForbidden, "Voting period is over.")
-		return
-	}
-
 	voter, err := ElectionDb.FindVoter(roll)
 	if err != nil {
 		c.String(http.StatusForbidden, "This student has not registered.")
