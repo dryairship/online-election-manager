@@ -301,6 +301,8 @@ func PrepareForNextRound(c *gin.Context) {
 		return
 	}
 
+	config.ElectionState = config.VotingNotYetStarted
+
 	c.String(http.StatusOK, "Ready for next round.")
 }
 
@@ -342,9 +344,10 @@ func SubmitSingleVoteResults(c *gin.Context) {
 				ballotIds = append(ballotIds, tmpBallotId)
 			}
 			candidateResult := models.CandidateResult{
-				Name:  candidate.Name,
-				Roll:  candidate.Roll,
-				Count: candidate.Count,
+				Name:   candidate.Name,
+				Roll:   candidate.Roll,
+				Count:  candidate.Count,
+				Status: candidate.Status,
 			}
 			candidateResults = append(candidateResults, candidateResult)
 
