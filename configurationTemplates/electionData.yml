@@ -1,0 +1,25 @@
+posts:
+  - id: 1
+    name: President, Students' Gymkhana
+    regex: 1[56789][01][0-9]{3}
+    candidates:
+      - roll: 160689
+        manifesto: http://ix.io/1EYr
+      - roll: 170817
+        manifesto: http://ix.io/1EYr
+  - id: 2
+    name: General Secretary, Science and Technology Council
+    regex: 1[56789][01][0-9]{3}
+    candidates:
+      - roll: 180561
+        manifesto: http://ix.io/1EYr
+  - id: 3
+    name: Senator, BT/BS Y18
+    regex: 180[0-9]{3}
+    candidates:
+      - roll: 180007
+        manifesto: http://ix.io/1EYr
+      - roll: 180850
+        manifesto: http://ix.io/1EYr
+      - roll: 180028
+        manifesto: http://ix.io/1EYr

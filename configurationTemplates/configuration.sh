@@ -3,6 +3,10 @@
 # Email ID through which mails are sent
 export OEMMailSenderEmailID="chief.election.officer.iitk@gmail.com"
 
+# Only if using IITK mailer
+# Username of the account (eg: 'darshi', if email ID is darshi@iitk.ac.in)
+export OEMMailSenderUsername="darshi"
+
 # Password of the account through which mails are sent
 export OEMMailSenderPassword="1L0v3CatsMeowwwww"
 
@@ -29,12 +33,15 @@ export OEMMongoUsername="ElectionAdmin"
 # Password of the Database Admin
 export OEMMongoPassword="1Al50L0veCatsMeowwwwww"
 
-# Exact path of the location of the `assets` folder 
-# Note that this should always end with `github.com/dryairship/online-election-manager/assets`
-export OEMAssetsPath="/path/to/the/application/github.com/dryairship/online-election-manager/assets"
+# Location of the build folder
+# Check the Frontend section on README for more details on this.
+export OEMAssetsPath="/path/to/the/application/build/folder/of/the/frontend"
+
+# Location of the folder where ballot Ids are to be stored 
+export OEMBallotIDsPath="/path/to/the/ballotids/folder"
 
 # CSV file that contains the details of posts and candidates
-export OEMElectionDataFilePath="/path/to/datafile/electionData.csv"
+export OEMElectionDataFilePath="/path/to/datafile/electionData.yml"
 
 # Key for encrypting data that is stored in cookies
 export OEMSessionsKey="An0th3rR@nD0Mpa55w0Rd"
