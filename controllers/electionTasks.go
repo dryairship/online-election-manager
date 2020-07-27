@@ -70,12 +70,6 @@ func SubmitVote(c *gin.Context) {
 
 // API handler to fetch the current election state.
 func GetElectionState(c *gin.Context) {
-	_, err := utils.GetSessionID(c)
-	if err != nil {
-		c.String(http.StatusForbidden, "You need to be logged in.")
-		return
-	}
-
 	c.String(http.StatusOK, string(48+config.ElectionState))
 }
 

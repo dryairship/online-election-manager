@@ -143,6 +143,19 @@ func FetchVotes(c *gin.Context) {
 	c.JSON(http.StatusOK, &votes)
 }
 
+func isCandidateStillInRace(postId, username string) bool {
+	for _, post := range Posts {
+		if post.PostID == postId && !post.Resolved {
+			for _, candidate := range post.Candidates {
+				if candidate == username {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
 // API handler to fetch all candidates from the database.
 func FetchCandidates(c *gin.Context) {
 	id, err := utils.GetSessionID(c)
@@ -156,13 +169,15 @@ func FetchCandidates(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error while fetching candidates.")
 	}
 
-	data := make([]CandidateData, len(candidates))
-	for i, candidate := range candidates {
-		data[i] = CandidateData{
-			Name:       candidate.Name,
-			Roll:       candidate.Roll,
-			PostID:     candidate.PostID,
-			PrivateKey: candidate.PrivateKey,
+	var data []CandidateData
+	for _, candidate := range candidates {
+		if isCandidateStillInRace(candidate.PostID, candidate.Username) {
+			data = append(data, CandidateData{
+				Name:       candidate.Name,
+				Roll:       candidate.Roll,
+				PostID:     candidate.PostID,
+				PrivateKey: candidate.PrivateKey,
+			})
 		}
 	}
 	c.JSON(http.StatusOK, data)
@@ -176,7 +191,7 @@ func FetchPosts(c *gin.Context) {
 		return
 	}
 
-	posts, err := ElectionDb.GetPosts()
+	posts, err := ElectionDb.GetPostsForCEO()
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error while fetching posts.")
 		return

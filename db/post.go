@@ -37,3 +37,15 @@ func (db ElectionDatabase) MarkPostResolved(postId string) error {
 		bson.M{"postid": postId}, bson.M{"$set": bson.M{"resolved": true}})
 	return err
 }
+
+func (db ElectionDatabase) GetPostsForCEO() ([]models.Post, error) {
+	var posts []models.Post
+
+	cursor, err := db.PostsCollection.Find(context.Background(), bson.M{"resolved": false})
+	if err != nil {
+		return posts, err
+	}
+
+	err = cursor.All(context.Background(), &posts)
+	return posts, err
+}
