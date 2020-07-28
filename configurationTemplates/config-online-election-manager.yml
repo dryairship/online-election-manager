@@ -5,24 +5,30 @@
 # Email ID through which mails are sent
 MailSenderEmailID: chief.election.officer.iitk@gmail.com
 
-# Only if using IITK mailer
-# Username of the account (eg: 'darshi', if email ID is darshi@iitk.ac.in)
-MailSenderUsername: darshi
+# The ID used for authentication with the SMTP server.
+# In most cases, this is the same as the email ID.
+# Sometimes (like when using IITK's SMTP server), this may be the
+# username of the account (eg: 'darshi', if the email ID is darshi@iitk.ac.in)
+MailSenderAuthID: chief.election.officer.iitk@gmail.com
 
 # Password of the account through which mails are sent
 MailSenderPassword: email_password
 
-# Subject of the verification mail
-MailSubject: Gymkhana Elections Voter Registration Verification Code
-
 # SMTP details
 MailSMTPHost: smtp.gmail.com
-MailSMTPPort: 465
+MailSMTPPort: 587
 
 # Suffix of the email IDs for the usernames contained in `students` collection in the database
 # Leave empty if `email` field itself contains the full email address
 MailSuffix: "@iitk.ac.in"
 
+# Signature used in the email
+# \n must be put for line breaks.
+MailSignature: "
+Chief Election Officer,\n
+Election Commission,\n
+IIT Kanpur
+"
 
 #######################
 ## Database Settings ##
@@ -59,6 +65,9 @@ ElectionDataFilePath: /path/to/datafile/electionData.yml
 ##########################
 ## Application Settings ##
 ##########################
+
+# The name of the elections
+ElectionName: General Elections 2020
 
 # Key for encrypting data that is stored in cookies
 SessionsKey: sessions_password

@@ -24,10 +24,11 @@ const (
 // Global variables used by the program
 var (
 	ElectionState        int
-	MailSenderUsername   string
+	ElectionName         string
+	MailSenderAuthID     string
 	MailSenderEmailID    string
 	MailSenderPassword   string
-	MailSubject          string
+	MailSignature        string
 	MailSMTPHost         string
 	MailSMTPPort         string
 	MailSuffix           string
@@ -44,7 +45,6 @@ var (
 	RollNumberOfCEO      string
 	PublicKeyOfCEO       string
 	PrivateKeyOfCEO      string
-	ApplicationStage     string
 	ResultProgress       float64
 )
 
@@ -75,9 +75,9 @@ func InitializeConfiguration() {
 	}
 
 	MailSenderEmailID = viper.GetString("MailSenderEmailID")
-	MailSenderUsername = viper.GetString("MailSenderUsername")
+	MailSenderAuthID = viper.GetString("MailSenderAuthID")
 	MailSenderPassword = viper.GetString("MailSenderPassword")
-	MailSubject = viper.GetString("MailSubject")
+	MailSignature = viper.GetString("MailSignature")
 	MailSMTPHost = viper.GetString("MailSMTPHost")
 	MailSMTPPort = viper.GetString("MailSMTPPort")
 	MailSuffix = viper.GetString("MailSuffix")
@@ -90,12 +90,11 @@ func InitializeConfiguration() {
 	AssetsPath = viper.GetString("AssetsPath")
 	BallotIDsPath = viper.GetString("BallotIDsPath")
 	ElectionDataFilePath = viper.GetString("ElectionDataFilePath")
+
 	ApplicationPort = viper.GetString("ApplicationPort")
 	SessionsKey = viper.GetString("SessionsKey")
-
 	MaxTimeDelay = viper.GetInt("MaxTimeDelay")
 
 	RollNumberOfCEO = viper.GetString("RollNumberOfCEO")
-
-	ApplicationStage = viper.GetString("ApplicationStage")
+	ElectionName = viper.GetString("ElectionName")
 }
