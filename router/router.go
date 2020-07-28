@@ -36,7 +36,6 @@ func SetUpRoutes(r *gin.Engine) {
 		ceo.GET("/fetchPosts", controllers.FetchPosts)
 		ceo.GET("/fetchVotes", controllers.FetchVotes)
 		ceo.GET("/fetchCandidates", controllers.FetchCandidates)
-		ceo.GET("/calculateResult", controllers.CalculateResult)
 		ceo.GET("/resultProgress", controllers.ResultProgress)
 		ceo.GET("/getResult", controllers.GetResult)
 		ceo.POST("/submitResults", controllers.SubmitSingleVoteResults)
