@@ -104,6 +104,11 @@ func (db ElectionDatabase) ResetDatabase() error {
 		return err
 	}
 
+	err = db.MarkAllVotersUnvoted()
+	if err != nil {
+		return err
+	}
+
 	// TODO: ceo, voters
 	return nil
 }
