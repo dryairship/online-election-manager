@@ -1,8 +1,9 @@
 package config
 
 import (
-	"os"
-	"strconv"
+	"log"
+
+	"github.com/spf13/viper"
 )
 
 // Possible Election States
@@ -49,7 +50,18 @@ var (
 
 // Method to read the values of the global variables from environment variables.
 func InitializeConfiguration() {
-	switch os.Getenv("OEMElectionState") {
+	viper.SetConfigName("config-online-election-manager")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("/go")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Println("[WARN] Unable to locate configuration file")
+	}
+
+	viper.AutomaticEnv()
+
+	switch viper.GetString("ElectionState") {
 	case "VotingNotYetStarted":
 		ElectionState = VotingNotYetStarted
 	case "AcceptingVotes":
@@ -59,31 +71,31 @@ func InitializeConfiguration() {
 	case "ResultsCalculated":
 		ElectionState = ResultsAvailable
 	default:
-		panic("OEMElectionState should be one of {VotingNotYetStarted, AcceptingVotes, VotingStopped, ResultsCalculated}")
+		log.Fatal("ElectionState should be one of {VotingNotYetStarted, AcceptingVotes, VotingStopped, ResultsCalculated}")
 	}
 
-	MailSenderEmailID = os.Getenv("OEMMailSenderEmailID")
-	MailSenderUsername = os.Getenv("OEMMailSenderUsername")
-	MailSenderPassword = os.Getenv("OEMMailSenderPassword")
-	MailSubject = os.Getenv("OEMMailSubject")
-	MailSMTPHost = os.Getenv("OEMMailSMTPHost")
-	MailSMTPPort = os.Getenv("OEMMailSMTPPort")
-	MailSuffix = os.Getenv("OEMMailSuffix")
+	MailSenderEmailID = viper.GetString("MailSenderEmailID")
+	MailSenderUsername = viper.GetString("MailSenderUsername")
+	MailSenderPassword = viper.GetString("MailSenderPassword")
+	MailSubject = viper.GetString("MailSubject")
+	MailSMTPHost = viper.GetString("MailSMTPHost")
+	MailSMTPPort = viper.GetString("MailSMTPPort")
+	MailSuffix = viper.GetString("MailSuffix")
 
-	MongoDialURL = os.Getenv("OEMMongoDialURL")
-	MongoDbName = os.Getenv("OEMMongoDbName")
-	MongoUsername = os.Getenv("OEMMongoUsername")
-	MongoPassword = os.Getenv("OEMMongoPassword")
+	MongoDialURL = viper.GetString("MongoDialURL")
+	MongoDbName = viper.GetString("MongoDbName")
+	MongoUsername = viper.GetString("MongoUsername")
+	MongoPassword = viper.GetString("MongoPassword")
 
-	AssetsPath = os.Getenv("OEMAssetsPath")
-	BallotIDsPath = os.Getenv("OEMBallotIDsPath")
-	ElectionDataFilePath = os.Getenv("OEMElectionDataFilePath")
-	ApplicationPort = os.Getenv("OEMApplicationPort")
-	SessionsKey = os.Getenv("OEMSessionsKey")
+	AssetsPath = viper.GetString("AssetsPath")
+	BallotIDsPath = viper.GetString("BallotIDsPath")
+	ElectionDataFilePath = viper.GetString("ElectionDataFilePath")
+	ApplicationPort = viper.GetString("ApplicationPort")
+	SessionsKey = viper.GetString("SessionsKey")
 
-	MaxTimeDelay, _ = strconv.Atoi(os.Getenv("OEMMaxTimeDelay"))
+	MaxTimeDelay = viper.GetInt("MaxTimeDelay")
 
-	RollNumberOfCEO = os.Getenv("OEMRollNumberOfCEO")
+	RollNumberOfCEO = viper.GetString("RollNumberOfCEO")
 
-	ApplicationStage = os.Getenv("OEMApplicationStage")
+	ApplicationStage = viper.GetString("ApplicationStage")
 }

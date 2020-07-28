@@ -6,3 +6,4 @@ assets
 cmd/old
 cache*
 TODO.md
+config-online-election-manager.yml

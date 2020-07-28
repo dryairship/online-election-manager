@@ -1,0 +1,79 @@
+####################
+## Email Settings ##
+####################
+
+# Email ID through which mails are sent
+MailSenderEmailID: chief.election.officer.iitk@gmail.com
+
+# Only if using IITK mailer
+# Username of the account (eg: 'darshi', if email ID is darshi@iitk.ac.in)
+MailSenderUsername: darshi
+
+# Password of the account through which mails are sent
+MailSenderPassword: email_password
+
+# Subject of the verification mail
+MailSubject: Gymkhana Elections Voter Registration Verification Code
+
+# SMTP details
+MailSMTPHost: smtp.gmail.com
+MailSMTPPort: 465
+
+# Suffix of the email IDs for the usernames contained in `students` collection in the database
+# Leave empty if `email` field itself contains the full email address
+MailSuffix: "@iitk.ac.in"
+
+
+#######################
+## Database Settings ##
+#######################
+
+# MongoDB URL. Leave Default if you did not change it while starting MongoDB
+MongoDialURL: "127.0.0.1:27017"
+
+# Name of the database in which the collections are stored
+MongoDbName: ElectionDb
+
+# Username of the Database Admin
+MongoUsername: ElectionAdmin
+
+# Password of the Database Admin
+MongoPassword: db_password
+
+
+########################
+## Paths to Resources ##
+########################
+
+# Location of the build folder
+# Check the Frontend section on README for more details on this.
+AssetsPath: /path/to/the/application/build/folder/of/the/frontend
+
+# Location of the folder where ballot Ids are to be stored 
+BallotIDsPath: /path/to/the/ballotids/folder
+
+# CSV file that contains the details of posts and candidates
+ElectionDataFilePath: /path/to/datafile/electionData.yml
+
+
+##########################
+## Application Settings ##
+##########################
+
+# Key for encrypting data that is stored in cookies
+SessionsKey: sessions_password
+
+# The state of elections when the server is started.
+# Should be one of {VotingNotYetStarted, AcceptingVotes, VotingStopped, ResultsCalculated}
+ElectionState: VotingNotYetStarted
+
+# Maximum time delay (in seconds) between receiving a vote and inserting it into the database.
+# An optimum value would be the time difference between 
+# the time at which voting stops and the time at which the results are declared.
+MaxTimeDelay: 10
+
+# Roll number of the CEO, as present in the `students` collection
+RollNumberOfCEO: 180561
+
+# Port on which the application should run
+ApplicationPort: ":8000"
