@@ -34,6 +34,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	ceo, err := controllers.ElectionDb.GetCEO()
+	if err != nil {
+		fmt.Println("[WARN] CEO has not registered.")
+	} else {
+		config.PublicKeyOfCEO = ceo.PublicKey
+	}
+
 	// Store the posts in a global variable so there is no need
 	// to access the database for the same data repeatedly.
 	controllers.Posts, err = controllers.ElectionDb.GetPosts()

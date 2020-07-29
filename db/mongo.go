@@ -68,13 +68,7 @@ func ConnectToDatabase() (ElectionDatabase, error) {
 		electionDb.BallotIdsCollection = mongoClient.Database(config.MongoDbName).Collection("ballotids")
 	}
 
-	ceo, err := electionDb.GetCEO()
-	if err != nil {
-		return electionDb, err
-	}
-	config.PublicKeyOfCEO = ceo.PublicKey
-
-	return electionDb, err
+	return electionDb, nil
 }
 
 // Function to delete all entries from the database.
