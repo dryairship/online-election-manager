@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/dryairship/online-election-manager/config"
@@ -27,6 +28,7 @@ func ExportBallotIdsToFile(ballotIds []models.UsedBallotID, fileName string) err
 	}
 
 	w.Flush()
+	log.Println("[INFO] Ballot IDs saved in: ", fileName)
 
 	return nil
 }
