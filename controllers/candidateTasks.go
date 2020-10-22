@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -96,12 +97,14 @@ func SendMailToCandidate(c *gin.Context) {
 	recipient := candidate.GetMailRecipient()
 	err = utils.SendMailTo(&recipient, "a candidate")
 	if err != nil {
+		log.Println("[ERROR] Mailer error while sending mail to candidate: ", candidate, err.Error())
 		c.String(http.StatusInternalServerError, "Mailer Utility is not working.")
 		return
 	}
 
 	err = ElectionDb.UpdateCandidate(username, &candidate)
 	if err != nil {
+		log.Println("[ERROR] Database error while sending mail to candidate: ", candidate, err.Error())
 		c.String(http.StatusInternalServerError, "Database error.")
 		return
 	}
@@ -145,6 +148,7 @@ func RegisterCandidate(c *gin.Context) {
 
 	err = ElectionDb.UpdateCandidate(username, &candidate)
 	if err != nil {
+		log.Println("[ERROR] Database error while registering candidate: ", candidate, err.Error())
 		c.String(http.StatusInternalServerError, "Database Error")
 	} else {
 		c.String(http.StatusAccepted, "Candidate successfully registered.")
@@ -203,6 +207,7 @@ func DeclarePrivateKey(c *gin.Context) {
 	candidate.KeyState = config.KeysDeclared
 	err = ElectionDb.UpdateCandidate(username, &candidate)
 	if err != nil {
+		log.Println("[ERROR] Database error while declaring private keys of candidate: ", candidate, err.Error())
 		c.String(http.StatusInternalServerError, "Database Error.")
 		return
 	}
@@ -241,6 +246,7 @@ func ConfirmCandidature(c *gin.Context) {
 	candidate.KeyState = config.KeysGenerated
 	err = ElectionDb.UpdateCandidate(username, &candidate)
 	if err != nil {
+		log.Println("[ERROR] Database error while confirming candidature: ", candidate, err.Error())
 		c.String(http.StatusInternalServerError, "Database Error.")
 		return
 	}

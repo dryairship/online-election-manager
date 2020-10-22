@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"regexp"
 
@@ -37,7 +38,7 @@ func CanMailBeSentToStudent(roll string) (bool, error) {
 		if voter.AuthCode == "" {
 			return false, &UserError{"Student has already registered."}
 		} else {
-			return false, &UserError{"Verification mail has already<br>been sent to this student."}
+			return false, &UserError{"Verification mail has already been sent to this student."}
 		}
 	}
 }
@@ -60,6 +61,7 @@ func GetPostsForVoter(roll string) []models.VotablePost {
 func GetVotablePosts(c *gin.Context) {
 	roll, err := utils.GetSessionID(c)
 	if err != nil {
+		log.Println("[WARN] Unauthorized getVotablePosts attempt: ", err.Error())
 		c.String(http.StatusForbidden, "You are not authorized to use this API.")
 		return
 	}
@@ -75,6 +77,7 @@ func GetAllPosts(c *gin.Context) {
 // API handler to register a new voter.
 func RegisterNewVoter(c *gin.Context) {
 	if config.ElectionState == config.VotingStopped {
+		log.Println("[WARN] Registration attempt after end of registration period: ", c.PostForm("roll"))
 		c.String(http.StatusForbidden, "Registration period is over.")
 		return
 	}
@@ -100,6 +103,7 @@ func RegisterNewVoter(c *gin.Context) {
 	}
 
 	if voter.AuthCode == "" {
+		log.Println("[WARN] Re-registration attempt: ", voter)
 		c.String(http.StatusForbidden, "Student has already registered.")
 		return
 	}
@@ -110,6 +114,7 @@ func RegisterNewVoter(c *gin.Context) {
 	}
 
 	if passHash == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" {
+		log.Println("[WARN] Registration attempt with empty password: ", voter)
 		c.String(http.StatusBadRequest, "Empty password is not allowed.")
 		return
 	}
@@ -119,6 +124,7 @@ func RegisterNewVoter(c *gin.Context) {
 
 	err = ElectionDb.UpdateVoter(roll, &voter)
 	if err != nil {
+		log.Println("[ERROR] Database error while registering voter: ", voter)
 		c.String(http.StatusInternalServerError, "Database Error")
 	} else {
 		c.String(http.StatusAccepted, "Voter successfully registered.")
@@ -128,6 +134,7 @@ func RegisterNewVoter(c *gin.Context) {
 // API handler to send a verification mail to the student.s
 func SendMailToStudent(c *gin.Context) {
 	if config.ElectionState == config.VotingStopped {
+		log.Println("[WARN] Verification-mail attempt after end of registration period: ", c.Param("roll"))
 		c.String(http.StatusForbidden, "Registration period is over.")
 		return
 	}
@@ -135,7 +142,8 @@ func SendMailToStudent(c *gin.Context) {
 	var captcha CAPTCHA
 	err := c.BindJSON(&captcha)
 	if err != nil {
-		c.String(http.StatusBadRequest, "LoL wut?")
+		log.Println("[ERROR] CAPTCHA data failed to bind to struct: ", err.Error())
+		c.String(http.StatusBadRequest, "Invalid data format")
 		return
 	}
 
@@ -159,12 +167,14 @@ func SendMailToStudent(c *gin.Context) {
 
 	_, err = CanMailBeSentToStudent(roll)
 	if err != nil {
+		log.Println("[WARN] Verification-mail not sent to voter: ", roll, err.Error())
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	skeleton, err := ElectionDb.FindStudentSkeleton(roll)
 	if err != nil {
+		log.Println("[ERROR] Student not found in database while sending verification mail: ", roll, err.Error())
 		c.String(http.StatusNotFound, "Invalid Roll Number. Student does not exist.")
 		return
 	}
@@ -173,11 +183,13 @@ func SendMailToStudent(c *gin.Context) {
 	recipient := voter.GetMailRecipient()
 	err = utils.SendMailTo(&recipient, "a voter")
 	if err != nil {
+		log.Println("[ERROR] Mailer not working while sending mail to voter: ", voter, err.Error())
 		c.String(http.StatusInternalServerError, "Mailer Utility is not working.")
 		return
 	} else {
 		err = ElectionDb.AddNewVoter(&voter)
 		if err != nil {
+			log.Println("[ERROR] Database error when sending mail to voter: ", voter, err.Error())
 			c.String(http.StatusInternalServerError, "Database error.")
 			return
 		}

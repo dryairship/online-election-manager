@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -15,17 +16,20 @@ import (
 func SubmitVote(c *gin.Context) {
 	roll, err := utils.GetSessionID(c)
 	if err != nil {
+		log.Println("[WARN] Unauthorized vote submission attempt: ", err.Error())
 		c.String(http.StatusForbidden, "Unauthorized vote submission.")
 		return
 	}
 
 	voter, err := ElectionDb.FindVoter(roll)
 	if err != nil {
+		log.Println("[ERROR] Voter not found in db while submitting vote: ", roll, err.Error())
 		c.String(http.StatusNotFound, "Voter not found.")
 		return
 	}
 
 	if voter.Voted {
+		log.Println("[WARN] Attempt to re-vote: ", voter, err.Error())
 		c.String(http.StatusForbidden, "This voter has already voted.")
 		return
 	}
@@ -33,6 +37,7 @@ func SubmitVote(c *gin.Context) {
 	var receivedVotes []models.ReceivedVote
 	err = c.BindJSON(&receivedVotes)
 	if err != nil {
+		log.Println("[ERROR] Vote JSON could not bind to struct: ", voter, err.Error())
 		c.String(http.StatusBadRequest, "Data format not recognized.")
 		return
 	}
@@ -43,10 +48,13 @@ func SubmitVote(c *gin.Context) {
 		vote := receivedVote.GetVote()
 
 		// Insert the vote after a random time delay.
-		go func() {
+		go func(vote models.Vote, voter models.Voter) {
 			time.Sleep(utils.GetRandomTimeDelay())
-			ElectionDb.InsertVote(&vote)
-		}()
+			err := ElectionDb.InsertVote(&vote)
+			if err != nil {
+				log.Println("[ERROR] Vote could not be inserted in the database: ", voter, err.Error())
+			}
+		}(vote, voter)
 	}
 
 	newVoter := models.Voter{
@@ -61,6 +69,7 @@ func SubmitVote(c *gin.Context) {
 
 	err = ElectionDb.UpdateVoter(roll, &newVoter)
 	if err != nil {
+		log.Println("[ERROR] Voter could not be updated after vote insertion: ", voter, newVoter, err.Error())
 		c.String(http.StatusInternalServerError, "Database Error")
 		return
 	}
@@ -76,6 +85,7 @@ func GetElectionState(c *gin.Context) {
 func GetSingleVoteResults(c *gin.Context) {
 	result, err := ElectionDb.FindAllSingleVoteResults()
 	if err != nil {
+		log.Println("[ERROR] Could not get single vote results from db: ", err.Error())
 		c.String(http.StatusInternalServerError, "Database Error")
 		return
 	}

@@ -56,7 +56,7 @@ func InitializeConfiguration() {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Println("[WARN] Unable to locate configuration file")
+		log.Println("[WARN] Unable to locate configuration file: ", err.Error())
 	}
 
 	viper.AutomaticEnv()
