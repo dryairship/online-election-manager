@@ -1,17 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"log"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
 
 	"github.com/dryairship/online-election-manager/config"
 	"github.com/dryairship/online-election-manager/controllers"
 	"github.com/dryairship/online-election-manager/db"
 	"github.com/dryairship/online-election-manager/router"
 	"github.com/dryairship/online-election-manager/utils"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -30,13 +30,12 @@ func main() {
 	// Connect to the database.
 	controllers.ElectionDb, err = db.ConnectToDatabase()
 	if err != nil {
-		fmt.Println("[ERROR] Could not establish database connection.")
-		os.Exit(1)
+		log.Fatalln("[ERROR] Could not establish database connection: ", err.Error())
 	}
 
 	ceo, err := controllers.ElectionDb.GetCEO()
 	if err != nil {
-		fmt.Println("[WARN] CEO has not registered.")
+		log.Println("[WARN] CEO has not registered.")
 	} else {
 		config.PublicKeyOfCEO = ceo.PublicKey
 	}
@@ -45,8 +44,7 @@ func main() {
 	// to access the database for the same data repeatedly.
 	controllers.Posts, err = controllers.ElectionDb.GetPosts()
 	if err != nil {
-		fmt.Println("[ERROR] Could not set posts data.")
-		os.Exit(1)
+		log.Fatalln("[ERROR] Could not set posts data:", err.Error())
 	}
 
 	// Set up an encrypted cookie based session storage.
@@ -57,5 +55,7 @@ func main() {
 	router.SetUpRoutes(r)
 
 	// Start the server on the specified port.
-	r.Run(config.ApplicationPort)
+	if err = r.Run(config.ApplicationPort); err != nil {
+		log.Fatalln("[ERROR] Could not start the server: ", err.Error())
+	}
 }
