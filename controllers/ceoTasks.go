@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"sort"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,20 +13,20 @@ import (
 )
 
 // Struct to accept the keys from the client.
-type NewCEOData struct {
+type newCEOData struct {
 	PublicKey  string `json:"pubkey"`
 	PrivateKey string `json:"privkey"`
 }
 
 // Struct to return candidates' data to the CEO.
-type CandidateData struct {
+type candidateData struct {
 	Name       string
 	Roll       string
 	PostID     string
 	PrivateKey string
 }
 
-type CandidateResult struct {
+type singleVoteCandidateResult struct {
 	Roll      string   `json:"roll"`
 	Name      string   `json:"name"`
 	Count     int32    `json:"count"`
@@ -35,15 +34,36 @@ type CandidateResult struct {
 	Status    string   `json:"status"`
 }
 
-type PostResult struct {
-	ID         string            `json:"postid"`
-	Name       string            `json:"postname"`
-	Resolved   bool              `json:"resolved"`
-	Candidates []CandidateResult `json:"candidates"`
+type candidateResult struct {
+	Roll        string `json:"roll"`
+	Name        string `json:"name"`
+	Preference1 int32  `json:"preference1"`
+	Preference2 int32  `json:"preference2"`
+	Preference3 int32  `json:"preference3"`
+	Status      string `json:"status"`
 }
 
-type ResultData struct {
-	Posts []PostResult `json:"posts"`
+type singleVotePostResult struct {
+	ID         string                      `json:"postid"`
+	Name       string                      `json:"postname"`
+	Resolved   bool                        `json:"resolved"`
+	Candidates []singleVoteCandidateResult `json:"candidates"`
+}
+
+type postResult struct {
+	ID         string                `json:"postid"`
+	Name       string                `json:"postname"`
+	Resolved   bool                  `json:"resolved"`
+	Candidates []candidateResult     `json:"candidates"`
+	BallotIDs  []models.UsedBallotID `json:"ballotIds"`
+}
+
+type singleVoteResultData struct {
+	Posts []singleVotePostResult `json:"posts"`
+}
+
+type resultData struct {
+	Posts []postResult `json:"posts"`
 }
 
 // API handler to send verification mail to CEO.
@@ -183,10 +203,10 @@ func FetchCandidates(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error while fetching candidates.")
 	}
 
-	var data []CandidateData
+	var data []candidateData
 	for _, candidate := range candidates {
 		if isCandidateStillInRace(candidate.PostID, candidate.Username) {
-			data = append(data, CandidateData{
+			data = append(data, candidateData{
 				Name:       candidate.Name,
 				Roll:       candidate.Roll,
 				PostID:     candidate.PostID,
@@ -236,7 +256,7 @@ func StartVoting(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "CEO not yet assigned.")
 		return
 	}
-	newData := NewCEOData{}
+	newData := newCEOData{}
 	err = c.BindJSON(&newData)
 	if err != nil {
 		log.Println("[ERROR] CEO data JSON did not bind to struct: ", err.Error())
@@ -284,30 +304,6 @@ func ResultProgress(c *gin.Context) {
 	c.String(http.StatusOK, fmt.Sprintf("%.3f%%", config.ResultProgress))
 }
 
-func GetResult(c *gin.Context) {
-	id, err := utils.GetSessionID(c)
-	if err != nil || id != "CEO" {
-		log.Println("[WARN] Unauthorized getResult attempt: ", id, err.Error())
-		c.String(http.StatusForbidden, "Only the CEO can access this.")
-		return
-	}
-
-	results, err := ElectionDb.FindAllResults()
-	if err != nil {
-		log.Println("[ERROR] Database error while getting results: ", err.Error())
-		c.String(http.StatusBadRequest, "Cannot find results in the database.")
-		return
-	}
-
-	numericResults := make([]models.NumericResult, len(results))
-	for i, result := range results {
-		numericResults[i] = result.ToNumericResult()
-	}
-
-	sort.Sort(models.ResultSorter(numericResults))
-	c.JSON(http.StatusOK, &numericResults)
-}
-
 func PrepareForNextRound(c *gin.Context) {
 	id, err := utils.GetSessionID(c)
 	if err != nil || id != "CEO" {
@@ -344,7 +340,7 @@ func SubmitSingleVoteResults(c *gin.Context) {
 		return
 	}
 
-	var results ResultData
+	var results singleVoteResultData
 	err = c.BindJSON(&results)
 	if err != nil {
 		log.Println("[ERROR] SingleVoteResults JSON did not bind to struct: ", err.Error())
@@ -353,7 +349,7 @@ func SubmitSingleVoteResults(c *gin.Context) {
 	}
 
 	for _, post := range results.Posts {
-		var ballotIds []models.UsedBallotID
+		var ballotIds []models.UsedSingleVoteBallotID
 		postId := post.ID
 		if post.Resolved {
 			if err := ElectionDb.MarkPostResolved(postId); err != nil {
@@ -366,9 +362,9 @@ func SubmitSingleVoteResults(c *gin.Context) {
 			ID:   postId,
 			Name: post.Name,
 		}
-		var candidateResults []models.CandidateResult
+		var candidateResults []models.SingleVoteCandidateResult
 		for _, candidate := range post.Candidates {
-			tmpBallotId := models.UsedBallotID{
+			tmpBallotId := models.UsedSingleVoteBallotID{
 				Name: candidate.Name,
 				Roll: candidate.Roll,
 			}
@@ -376,7 +372,7 @@ func SubmitSingleVoteResults(c *gin.Context) {
 				tmpBallotId.BallotString = ballotString
 				ballotIds = append(ballotIds, tmpBallotId)
 			}
-			candidateResult := models.CandidateResult{
+			candidateResult := models.SingleVoteCandidateResult{
 				Name:   candidate.Name,
 				Roll:   candidate.Roll,
 				Count:  candidate.Count,
@@ -402,7 +398,86 @@ func SubmitSingleVoteResults(c *gin.Context) {
 			return
 		}
 
-		err = utils.ExportBallotIdsToFile(ballotIds, postId)
+		err = utils.ExportSingleVoteBallotIdsToFile(ballotIds, postId)
+		if err != nil {
+			log.Println("[ERROR] Util error while exporting ballot IDs to file: ", err.Error())
+			c.String(http.StatusInternalServerError, "Cannot export BallotIds.")
+			return
+		}
+	}
+
+	Posts, err = ElectionDb.GetPosts()
+	if err != nil {
+		log.Println("[ERROR] Database error while getting remaining posts: ", err.Error())
+		c.String(http.StatusBadRequest, "Database error.")
+		return
+	}
+
+	config.ElectionState = config.ResultsAvailable
+	log.Println("[INFO] Results stored in the database")
+	c.String(http.StatusAccepted, "Results accepted.")
+}
+
+func SubmitResults(c *gin.Context) {
+	id, err := utils.GetSessionID(c)
+	if err != nil || id != "CEO" {
+		log.Println("[WARN] Unauthorized submitResults attempt: ", id, err.Error())
+		c.String(http.StatusForbidden, "Only the CEO can access this.")
+		return
+	}
+
+	var results resultData
+	err = c.BindJSON(&results)
+	if err != nil {
+		log.Println("[ERROR] Results JSON did not bind to struct: ", err.Error())
+		c.String(http.StatusBadRequest, "Data format not recognized.")
+		return
+	}
+
+	for _, post := range results.Posts {
+		postId := post.ID
+		if post.Resolved {
+			if err := ElectionDb.MarkPostResolved(postId); err != nil {
+				log.Println("[ERROR] Database error while marking post resolved: ", postId, err.Error())
+				c.String(http.StatusBadRequest, "Database error.")
+				return
+			}
+		}
+		result := models.Result{
+			ID:   postId,
+			Name: post.Name,
+		}
+		var candidateResults []models.CandidateResult
+		for _, candidate := range post.Candidates {
+			candidateResult := models.CandidateResult{
+				Name:        candidate.Name,
+				Roll:        candidate.Roll,
+				Preference1: candidate.Preference1,
+				Preference2: candidate.Preference2,
+				Preference3: candidate.Preference3,
+				Status:      candidate.Status,
+			}
+			candidateResults = append(candidateResults, candidateResult)
+
+			if candidate.Status == "eliminated" {
+				err = ElectionDb.EliminateCandidate(postId, candidate.Roll)
+				if err != nil {
+					log.Println("[ERROR] Database error while eliminating candidate: ", postId, candidate, err.Error())
+					c.String(http.StatusInternalServerError, "Database error.")
+					return
+				}
+			}
+		}
+		result.Candidates = candidateResults
+
+		err = ElectionDb.InsertResult(&result)
+		if err != nil {
+			log.Println("[ERROR] Database error while inserting Result: ", result, err.Error())
+			c.String(http.StatusInternalServerError, "Database error.")
+			return
+		}
+
+		err = utils.ExportBallotIdsToFile(post.BallotIDs, postId)
 		if err != nil {
 			log.Println("[ERROR] Util error while exporting ballot IDs to file: ", err.Error())
 			c.String(http.StatusInternalServerError, "Cannot export BallotIds.")

@@ -1,28 +1,31 @@
 package db
 
 import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/dryairship/online-election-manager/models"
 )
 
-// Function to insert a new result into the database.
-// TODO
 func (db ElectionDatabase) InsertResult(result *models.Result) error {
-	//resultsCollection := db.Session.DB(config.MongoDbName).C("results")
-	//err := resultsCollection.Insert(&result)
-	return nil
+	_, err := db.ResultsCollection.InsertOne(context.Background(), result)
+	return err
 }
 
-// TODO
 func (db ElectionDatabase) FindAllResults() ([]models.Result, error) {
-	//resultsCollection := db.Session.DB(config.MongoDbName).C("results")
 	var results []models.Result
-	//err := resultsCollection.Find(nil).All(&results)
-	return results, nil
+
+	cursor, err := db.ResultsCollection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return results, err
+	}
+
+	err = cursor.All(context.Background(), &results)
+	return results, err
 }
 
-// TODO
 func (db ElectionDatabase) ClearResults() error {
-	//resultsCollection := db.Session.DB(config.MongoDbName).C("results")
-	//_, err := resultsCollection.RemoveAll(nil)
-	return nil
+	err := db.ResultsCollection.Drop(context.Background())
+	return err
 }

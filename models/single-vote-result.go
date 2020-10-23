@@ -1,6 +1,6 @@
 package models
 
-type CandidateResult struct {
+type SingleVoteCandidateResult struct {
 	Name   string `json:"name"`
 	Roll   string `json:"roll"`
 	Count  int32  `json:"count"`
@@ -8,7 +8,7 @@ type CandidateResult struct {
 }
 
 type SingleVoteResult struct {
-	ID         string            `json:"postId"`
-	Name       string            `json:"postName"`
-	Candidates []CandidateResult `json:"candidates"`
+	ID         string                      `json:"postId"`
+	Name       string                      `json:"postName"`
+	Candidates []SingleVoteCandidateResult `json:"candidates"`
 }
