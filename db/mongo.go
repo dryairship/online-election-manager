@@ -23,6 +23,7 @@ type ElectionDatabase struct {
 	PostsCollection             *mongo.Collection
 	BallotIdsCollection         *mongo.Collection
 	SingleVoteResultsCollection *mongo.Collection
+	ResultsCollection           *mongo.Collection
 	StudentsCollection          *mongo.Collection
 	VotesCollection             *mongo.Collection
 }
@@ -65,6 +66,7 @@ func ConnectToDatabase() (ElectionDatabase, error) {
 		electionDb.VotesCollection = mongoClient.Database(config.MongoDbName).Collection("votes")
 		electionDb.StudentsCollection = mongoClient.Database(config.MongoDbName).Collection("students")
 		electionDb.SingleVoteResultsCollection = mongoClient.Database(config.MongoDbName).Collection("singlevoteresults")
+		electionDb.ResultsCollection = mongoClient.Database(config.MongoDbName).Collection("results")
 		electionDb.BallotIdsCollection = mongoClient.Database(config.MongoDbName).Collection("ballotids")
 	}
 
