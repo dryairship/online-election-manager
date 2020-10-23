@@ -14,20 +14,20 @@ import (
 )
 
 // Struct to accept the keys from the client.
-type NewCEOData struct {
+type newCEOData struct {
 	PublicKey  string `json:"pubkey"`
 	PrivateKey string `json:"privkey"`
 }
 
 // Struct to return candidates' data to the CEO.
-type CandidateData struct {
+type candidateData struct {
 	Name       string
 	Roll       string
 	PostID     string
 	PrivateKey string
 }
 
-type CandidateResult struct {
+type candidateResult struct {
 	Roll      string   `json:"roll"`
 	Name      string   `json:"name"`
 	Count     int32    `json:"count"`
@@ -35,15 +35,15 @@ type CandidateResult struct {
 	Status    string   `json:"status"`
 }
 
-type PostResult struct {
+type postResult struct {
 	ID         string            `json:"postid"`
 	Name       string            `json:"postname"`
 	Resolved   bool              `json:"resolved"`
-	Candidates []CandidateResult `json:"candidates"`
+	Candidates []candidateResult `json:"candidates"`
 }
 
-type ResultData struct {
-	Posts []PostResult `json:"posts"`
+type resultData struct {
+	Posts []postResult `json:"posts"`
 }
 
 // API handler to send verification mail to CEO.
@@ -183,10 +183,10 @@ func FetchCandidates(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error while fetching candidates.")
 	}
 
-	var data []CandidateData
+	var data []candidateData
 	for _, candidate := range candidates {
 		if isCandidateStillInRace(candidate.PostID, candidate.Username) {
-			data = append(data, CandidateData{
+			data = append(data, candidateData{
 				Name:       candidate.Name,
 				Roll:       candidate.Roll,
 				PostID:     candidate.PostID,
@@ -236,7 +236,7 @@ func StartVoting(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "CEO not yet assigned.")
 		return
 	}
-	newData := NewCEOData{}
+	newData := newCEOData{}
 	err = c.BindJSON(&newData)
 	if err != nil {
 		log.Println("[ERROR] CEO data JSON did not bind to struct: ", err.Error())
@@ -344,7 +344,7 @@ func SubmitSingleVoteResults(c *gin.Context) {
 		return
 	}
 
-	var results ResultData
+	var results resultData
 	err = c.BindJSON(&results)
 	if err != nil {
 		log.Println("[ERROR] SingleVoteResults JSON did not bind to struct: ", err.Error())
@@ -366,7 +366,7 @@ func SubmitSingleVoteResults(c *gin.Context) {
 			ID:   postId,
 			Name: post.Name,
 		}
-		var candidateResults []models.CandidateResult
+		var candidateResults []models.SingleVoteCandidateResult
 		for _, candidate := range post.Candidates {
 			tmpBallotId := models.UsedBallotID{
 				Name: candidate.Name,
@@ -376,7 +376,7 @@ func SubmitSingleVoteResults(c *gin.Context) {
 				tmpBallotId.BallotString = ballotString
 				ballotIds = append(ballotIds, tmpBallotId)
 			}
-			candidateResult := models.CandidateResult{
+			candidateResult := models.SingleVoteCandidateResult{
 				Name:   candidate.Name,
 				Roll:   candidate.Roll,
 				Count:  candidate.Count,
