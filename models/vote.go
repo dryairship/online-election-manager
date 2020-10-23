@@ -31,10 +31,17 @@ type (
 		VoteData     string `json:"VoteData"`
 	}
 
-	UsedBallotID struct {
+	UsedSingleVoteBallotID struct {
 		BallotString string
 		Roll         string
 		Name         string
+	}
+
+	UsedBallotID struct {
+		BallotString string `json:"ballotString"`
+		Preference1  string `json:"preference1"`
+		Preference2  string `json:"preference2"`
+		Preference3  string `json:"preference3"`
 	}
 )
 
