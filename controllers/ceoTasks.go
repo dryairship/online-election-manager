@@ -40,7 +40,6 @@ type candidateResult struct {
 	Preference1 int32  `json:"preference1"`
 	Preference2 int32  `json:"preference2"`
 	Preference3 int32  `json:"preference3"`
-	Status      string `json:"status"`
 }
 
 type singleVotePostResult struct {
@@ -51,11 +50,10 @@ type singleVotePostResult struct {
 }
 
 type postResult struct {
-	ID         string                `json:"postid"`
-	Name       string                `json:"postname"`
-	Resolved   bool                  `json:"resolved"`
-	Candidates []candidateResult     `json:"candidates"`
-	BallotIDs  []models.UsedBallotID `json:"ballotIds"`
+	ID         string            `json:"postid"`
+	Name       string            `json:"postname"`
+	Candidates []candidateResult `json:"candidates"`
+	BallotIDs  []string          `json:"ballotIds"`
 }
 
 type singleVoteResultData struct {
@@ -436,13 +434,6 @@ func SubmitResults(c *gin.Context) {
 
 	for _, post := range results.Posts {
 		postId := post.ID
-		if post.Resolved {
-			if err := ElectionDb.MarkPostResolved(postId); err != nil {
-				log.Println("[ERROR] Database error while marking post resolved: ", postId, err.Error())
-				c.String(http.StatusBadRequest, "Database error.")
-				return
-			}
-		}
 		result := models.Result{
 			ID:   postId,
 			Name: post.Name,
@@ -455,18 +446,9 @@ func SubmitResults(c *gin.Context) {
 				Preference1: candidate.Preference1,
 				Preference2: candidate.Preference2,
 				Preference3: candidate.Preference3,
-				Status:      candidate.Status,
+				Status:      "none",
 			}
 			candidateResults = append(candidateResults, candidateResult)
-
-			if candidate.Status == "eliminated" {
-				err = ElectionDb.EliminateCandidate(postId, candidate.Roll)
-				if err != nil {
-					log.Println("[ERROR] Database error while eliminating candidate: ", postId, candidate, err.Error())
-					c.String(http.StatusInternalServerError, "Database error.")
-					return
-				}
-			}
 		}
 		result.Candidates = candidateResults
 

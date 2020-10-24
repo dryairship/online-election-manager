@@ -33,7 +33,7 @@ func ExportSingleVoteBallotIdsToFile(ballotIds []models.UsedSingleVoteBallotID, 
 	return nil
 }
 
-func ExportBallotIdsToFile(ballotIds []models.UsedBallotID, fileName string) error {
+func ExportBallotIdsToFile(ballotIds []string, fileName string) error {
 	path := fmt.Sprintf("%s/%s", config.BallotIDsPath, fileName)
 	file, err := os.Create(path)
 	if err != nil {
@@ -44,7 +44,7 @@ func ExportBallotIdsToFile(ballotIds []models.UsedBallotID, fileName string) err
 	w := bufio.NewWriter(file)
 
 	for _, ballotId := range ballotIds {
-		_, err = w.WriteString(fmt.Sprintf("%s - %s, %s, %s\n", ballotId.BallotString, ballotId.Preference1, ballotId.Preference2, ballotId.Preference3))
+		_, err = w.WriteString(fmt.Sprintf("%s\n", ballotId))
 		if err != nil {
 			return err
 		}

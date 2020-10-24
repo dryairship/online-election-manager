@@ -14,6 +14,6 @@ type (
 	Result struct {
 		ID         string            `json:"postId"`
 		Name       string            `json:"postName"`
-		Candidates []CandidateResult `json:"candidate"`
+		Candidates []CandidateResult `json:"candidates"`
 	}
 )

@@ -29,7 +29,7 @@ func SubmitVote(c *gin.Context) {
 	}
 
 	if voter.Voted {
-		log.Println("[WARN] Attempt to re-vote: ", voter, err.Error())
+		log.Println("[WARN] Attempt to re-vote: ", voter)
 		c.String(http.StatusForbidden, "This voter has already voted.")
 		return
 	}
