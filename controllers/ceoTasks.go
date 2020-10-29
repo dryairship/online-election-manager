@@ -164,6 +164,12 @@ func FetchVotes(c *gin.Context) {
 		return
 	}
 
+	if config.ElectionState != config.VotingStopped {
+		log.Println("[WARN] CEO tried to fetch votes before stopping voting")
+		c.String(http.StatusForbidden, "Please stop voting before fetching votes")
+		return
+	}
+
 	votes, err := ElectionDb.GetVotes()
 	if err != nil {
 		log.Println("[ERROR] Database error while fetching votes: ", err.Error())
