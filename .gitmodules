@@ -1,3 +1,6 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/dryairship/online-election-manager-frontend.git
+[submodule "backend"]
+	path = online-election-manager-frontend
+	url = https://github.com/dryairship/online-election-manager-frontend.git
