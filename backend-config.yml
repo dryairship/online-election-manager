@@ -1,0 +1,62 @@
+####################
+## Email Settings ##
+####################
+
+# Suffix of the email IDs for the usernames contained in `students` collection in the database
+# Leave empty if `email` value itself contains the full email address
+MailSuffix: "@iitk.ac.in"
+
+#######################
+## Database Settings ##
+#######################
+
+# MongoDB URL
+MongoDialURL: "mongo:27017"
+
+# Name of the database in which the collections are stored
+MongoDbName: ElectionDB
+
+# Username of the Database Admin
+MongoUsername: ElectionAdmin
+
+# Password of the Database Admin
+MongoPassword: password
+
+# Whether username/password is required to connect to mongo 
+MongoUsingAuth: false
+
+########################
+## Paths to Resources ##
+########################
+
+# Location of the folder where ballot Ids are to be stored 
+BallotIDsPath: /oem/resources/ballots
+
+# YML file that contains the details of posts and candidates
+ElectionDataFilePath: /oem/resources/electionData.yml
+
+# Location of the folder where the generated candidates file is present
+CandidatesOutputPath: /oem/resources/data
+
+# Location where lists of voters for each post are present in PostId.txt format
+VotersListPath: /oem/resources/voters
+
+##########################
+## Application Settings ##
+##########################
+
+# The state of elections when the server is started.
+# Should be one of {VotingNotYetStarted, AcceptingVotes, VotingStopped, ResultsCalculated}
+ElectionState: VotingNotYetStarted
+#ElectionState: AcceptingVotes
+#ElectionState: VotingStopped
+#ElectionState: ResultsCalculated
+
+# Whether Captcha check required
+UsingCaptcha: true
+
+# Roll number of the CEO, as present in the `students` collection
+RollNumberOfCEO: 180561
+
+# Port on which the application should run
+ApplicationPort: ":4000"

@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo
+    restart: on-failure
+    volumes:
+      - /home/dryairship:/dryairship # For dumping/restoring dbs
+
+  frontend:
+    image: dryairship/online-election-manager:frontend
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_DISPLAY_PHOTOS: "false"
+        REACT_APP_MAX_PREFERENCES: "3"
+        REACT_APP_ELECTION_TITLE: "General Elections 2021 | IIT Kanpur"
+    ports:
+      - "39741:80"
+    volumes:
+      - /home/dryairship:/dryairship # Solely for debugging purposes
+
+  backend:
+    image: dryairship/online-election-manager:backend
+    build:
+      context: ./backend
+    ports:
+      - "39740:4000"
+    volumes:
+      - ./resources:/oem/resources
+      - ./backend-config.yml:/oem/backend-config.yml
+      - /home/dryairship:/dryairship # Solely for debugging purposes

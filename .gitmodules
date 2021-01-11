@@ -2,5 +2,8 @@
 	path = frontend
 	url = https://github.com/dryairship/online-election-manager-frontend.git
 [submodule "backend"]
-	path = online-election-manager-frontend
-	url = https://github.com/dryairship/online-election-manager-frontend.git
+	path = backend
+	url = https://github.com/dryairship/online-election-manager-backend.git
+[submodule "result-calculator"]
+	path = result-calculator
+	url = https://github.com/dryairship/online-election-manager-result-calculator.git
