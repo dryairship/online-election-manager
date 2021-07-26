@@ -1,0 +1,1 @@
+This directory must contain files named `<postId>.txt`, for each post, containing the roll numbers of the voters allowed to vote for the post with post ID (prescribed in [electionData.yml](https://github.com/dryairship/online-election-manager/blob/master/resources/electionData.yml)) equal to `<postId>`.

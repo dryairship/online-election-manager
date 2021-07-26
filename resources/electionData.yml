@@ -1,0 +1,15 @@
+posts:
+  - id: 1
+    name: President, Students' Gymkhana
+    hasnota: true
+    candidates:
+      - 101
+      - 102
+  - id: 2
+    name: Senator, BT/BS Y18
+    hasnota: false
+    candidates:
+      - 103
+      - 104
+      - 105
+      - 106
